@@ -38,10 +38,11 @@ SSE recorded queued/running/completed events for real jobs; these drive characte
 - Mission Control showed device-wide GPU utilization, power and temperature; GPU memory displayed Unavailable.
 - Desktop and 390px portrait layout reviewed; responsive camera fitting and scrollable drawers implemented.
 - A fresh production browser tab passed 3D → 2D → 3D → Mission Control → 3D transitions, restoring the rendered room with no logged errors or warnings. The WebGL canvas stays mounted while hidden between views, avoiding the observed Drei/React renderer cleanup error.
+- The final 390px portrait recheck passed for the world and Finance drawer; document scroll width stayed at the viewport width. Camera orbit, motion toggle, and both view transitions passed with an empty error/warning log. See [final browser check record](evidence/browser-checks.json).
 
 ## Evidence and limitations
 
-- [Operations room](evidence/operations-room.jpg), [HR](evidence/hr-response.jpg), [Finance](evidence/finance-response.jpg), [Security](evidence/security-block.jpg), [scheduler](evidence/scheduler-comparison.jpg), [Studio/missing-policy](evidence/agent-studio-not-found.jpg), [architecture](evidence/architecture.svg).
+- [Final production room](evidence/final-room.jpg), [operations room](evidence/operations-room.jpg), [HR](evidence/hr-response.jpg), [Finance](evidence/finance-response.jpg), [Security](evidence/security-block.jpg), [scheduler](evidence/scheduler-comparison.jpg), [Studio/missing-policy](evidence/agent-studio-not-found.jpg), [390px Finance drawer](evidence/mobile-drawer.jpg), [architecture](evidence/architecture.svg).
 - The durable history retains the initial rejected Finance narrative from testing. The validator was revised and repeated real Finance jobs passed afterward. No failure history was silently deleted.
 - WAN-disconnected acceptance remains **not tested**. Follow [OFFLINE_TEST.md](OFFLINE_TEST.md) on the GX10 after caching dependencies and model weights.
 - Multiuser authentication, external connectors, enterprise compliance and process sandboxing remain outside the hackathon MVP. Tools cannot execute arbitrary code or external actions.
