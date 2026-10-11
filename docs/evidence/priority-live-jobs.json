@@ -1,0 +1,980 @@
+[
+  {
+    "id": "1c5d4c83-ed68-45b4-8636-bd80714c420e",
+    "agent_id": "finance",
+    "type": "finance",
+    "prompt": "Analyze this fictional invoice ledger for duplicates and overdue totals.",
+    "priority": "standard",
+    "status": "completed",
+    "created_at": "2026-10-11T02:49:32.968343+00:00",
+    "started_at": "2026-10-11T02:49:32.971484+00:00",
+    "completed_at": "2026-10-11T02:49:34.832558+00:00",
+    "result": {
+      "calculations": {
+        "as_of": "2026-10-10",
+        "currency": "USD",
+        "row_count": 8,
+        "total_amount": "6601.50",
+        "outstanding_total": "6200.50",
+        "overdue_total": "4950.50",
+        "overdue_count": 4,
+        "duplicate_id_count": 1,
+        "deduplicated_outstanding_total": "5000.50",
+        "deduplicated_overdue_total": "3750.50",
+        "method": "Exact Decimal sums; unpaid and due_date < as_of; deduplicated figures retain the first CSV record per invoice_id. Inspect conflicting duplicate rows before acting."
+      },
+      "rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Bright Studio",
+          "invoice_id": "INV-1003",
+          "due_date": "2026-10-20",
+          "amount": "900.00",
+          "status": "unpaid",
+          "category": "Design",
+          "row_number": 5,
+          "overdue": false
+        },
+        {
+          "vendor": "Pacific Utilities",
+          "invoice_id": "INV-1004",
+          "due_date": "2026-09-30",
+          "amount": "275.25",
+          "status": "paid",
+          "category": "Utilities",
+          "row_number": 6,
+          "overdue": false
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        },
+        {
+          "vendor": "Northwind Hosting",
+          "invoice_id": "INV-1006",
+          "due_date": "2026-10-30",
+          "amount": "350.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 8,
+          "overdue": false
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1007",
+          "due_date": "2026-09-25",
+          "amount": "125.75",
+          "status": "paid",
+          "category": "Office",
+          "row_number": 9,
+          "overdue": false
+        }
+      ],
+      "duplicate_invoices": [
+        {
+          "invoice_id": "INV-1001",
+          "count": 2,
+          "row_numbers": [
+            2,
+            4
+          ],
+          "rows": [
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 2,
+              "overdue": true
+            },
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 4,
+              "overdue": true
+            }
+          ]
+        }
+      ],
+      "overdue_rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        }
+      ],
+      "sources": [
+        {
+          "document": "invoices.csv",
+          "type": "csv",
+          "synthetic": true
+        }
+      ],
+      "synthetic": true,
+      "answer": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.\n\nConfirmed duplicate IDs: INV-1001. Raw overdue total: $4950.50; deduplicated overdue total: $3750.50.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1858.57,
+      "inference_wait_ms": 0.01,
+      "usage": {
+        "prompt_tokens": 423,
+        "completion_tokens": 77,
+        "total_tokens": 500
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "structured": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "grounded_narrative": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "narrative_validation": "Exact duplicate IDs and Decimal money strings verified; qualitative model guidance contains no numeric claims.",
+      "narrative_attempts": 1,
+      "tool": "analyze_invoices",
+      "narrative_label": "Local Nemotron narrative; exact calculations shown separately"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 3.14,
+      "inference_latency_ms": 1858.57,
+      "inference_wait_ms": 0.01,
+      "tokens": 500,
+      "prompt_tokens": 423,
+      "completion_tokens": 77,
+      "model": "nemotron3:33b",
+      "processing_ms": 1859.35
+    }
+  },
+  {
+    "id": "3daaaa3c-1a96-4693-b0ac-d7fdc0becf42",
+    "agent_id": "finance",
+    "type": "finance",
+    "prompt": "Analyze this fictional invoice ledger for duplicates and overdue totals.",
+    "priority": "standard",
+    "status": "completed",
+    "created_at": "2026-10-11T02:53:08.977235+00:00",
+    "started_at": "2026-10-11T02:53:08.978812+00:00",
+    "completed_at": "2026-10-11T02:53:10.899555+00:00",
+    "result": {
+      "calculations": {
+        "as_of": "2026-10-10",
+        "currency": "USD",
+        "row_count": 8,
+        "total_amount": "6601.50",
+        "outstanding_total": "6200.50",
+        "overdue_total": "4950.50",
+        "overdue_count": 4,
+        "duplicate_id_count": 1,
+        "deduplicated_outstanding_total": "5000.50",
+        "deduplicated_overdue_total": "3750.50",
+        "method": "Exact Decimal sums; unpaid and due_date < as_of; deduplicated figures retain the first CSV record per invoice_id. Inspect conflicting duplicate rows before acting."
+      },
+      "rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Bright Studio",
+          "invoice_id": "INV-1003",
+          "due_date": "2026-10-20",
+          "amount": "900.00",
+          "status": "unpaid",
+          "category": "Design",
+          "row_number": 5,
+          "overdue": false
+        },
+        {
+          "vendor": "Pacific Utilities",
+          "invoice_id": "INV-1004",
+          "due_date": "2026-09-30",
+          "amount": "275.25",
+          "status": "paid",
+          "category": "Utilities",
+          "row_number": 6,
+          "overdue": false
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        },
+        {
+          "vendor": "Northwind Hosting",
+          "invoice_id": "INV-1006",
+          "due_date": "2026-10-30",
+          "amount": "350.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 8,
+          "overdue": false
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1007",
+          "due_date": "2026-09-25",
+          "amount": "125.75",
+          "status": "paid",
+          "category": "Office",
+          "row_number": 9,
+          "overdue": false
+        }
+      ],
+      "duplicate_invoices": [
+        {
+          "invoice_id": "INV-1001",
+          "count": 2,
+          "row_numbers": [
+            2,
+            4
+          ],
+          "rows": [
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 2,
+              "overdue": true
+            },
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 4,
+              "overdue": true
+            }
+          ]
+        }
+      ],
+      "overdue_rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        }
+      ],
+      "sources": [
+        {
+          "document": "invoices.csv",
+          "type": "csv",
+          "synthetic": true
+        }
+      ],
+      "synthetic": true,
+      "answer": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.\n\nConfirmed duplicate IDs: INV-1001. Raw overdue total: $4950.50; deduplicated overdue total: $3750.50.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1919.42,
+      "inference_wait_ms": 0.0,
+      "usage": {
+        "prompt_tokens": 423,
+        "completion_tokens": 81,
+        "total_tokens": 504
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "structured": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "grounded_narrative": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "narrative_validation": "Exact duplicate IDs and Decimal money strings verified; qualitative model guidance contains no numeric claims.",
+      "narrative_attempts": 1,
+      "tool": "analyze_invoices",
+      "narrative_label": "Local Nemotron narrative; exact calculations shown separately"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 1.58,
+      "inference_latency_ms": 1919.42,
+      "inference_wait_ms": 0.0,
+      "tokens": 504,
+      "prompt_tokens": 423,
+      "completion_tokens": 81,
+      "model": "nemotron3:33b",
+      "processing_ms": 1919.76
+    }
+  },
+  {
+    "id": "7f897bea-e574-4a0b-80fb-96edc0bcc23c",
+    "agent_id": "support",
+    "type": "support",
+    "prompt": "Urgent: a fictional customer cannot access the account before their meeting. Draft a helpful response.",
+    "priority": "urgent",
+    "status": "completed",
+    "created_at": "2026-10-11T02:53:09.080271+00:00",
+    "started_at": "2026-10-11T02:53:10.907300+00:00",
+    "completed_at": "2026-10-11T02:53:12.609194+00:00",
+    "result": {
+      "answer": "I\u2019m sorry you\u2019re unable to log in. To get you back into the portal quickly, could you please confirm the email address associated with your account and let me know if you\u2019ve received any password\u2011reset instructions? If you\u2019re still having trouble, I can arrange a temporary access link for you to use before your meeting.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1672.61,
+      "inference_wait_ms": 0.0,
+      "usage": {
+        "prompt_tokens": 297,
+        "completion_tokens": 68,
+        "total_tokens": 365
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "sources": [
+        {
+          "document": "support_tickets.json",
+          "type": "json",
+          "synthetic": true
+        }
+      ],
+      "draft_only": true,
+      "synthetic": true,
+      "tool": "draft_support_reply"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 1827.03,
+      "inference_latency_ms": 1672.61,
+      "inference_wait_ms": 0.0,
+      "tokens": 365,
+      "prompt_tokens": 297,
+      "completion_tokens": 68,
+      "model": "nemotron3:33b",
+      "processing_ms": 1699.16
+    }
+  },
+  {
+    "id": "e8230b95-00ea-4bd8-b871-30af963aa0dc",
+    "agent_id": "finance",
+    "type": "finance",
+    "prompt": "Analyze this fictional invoice ledger for duplicates and overdue totals.",
+    "priority": "standard",
+    "status": "completed",
+    "created_at": "2026-10-11T02:53:09.017678+00:00",
+    "started_at": "2026-10-11T02:53:12.612934+00:00",
+    "completed_at": "2026-10-11T02:53:14.532413+00:00",
+    "result": {
+      "calculations": {
+        "as_of": "2026-10-10",
+        "currency": "USD",
+        "row_count": 8,
+        "total_amount": "6601.50",
+        "outstanding_total": "6200.50",
+        "overdue_total": "4950.50",
+        "overdue_count": 4,
+        "duplicate_id_count": 1,
+        "deduplicated_outstanding_total": "5000.50",
+        "deduplicated_overdue_total": "3750.50",
+        "method": "Exact Decimal sums; unpaid and due_date < as_of; deduplicated figures retain the first CSV record per invoice_id. Inspect conflicting duplicate rows before acting."
+      },
+      "rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Bright Studio",
+          "invoice_id": "INV-1003",
+          "due_date": "2026-10-20",
+          "amount": "900.00",
+          "status": "unpaid",
+          "category": "Design",
+          "row_number": 5,
+          "overdue": false
+        },
+        {
+          "vendor": "Pacific Utilities",
+          "invoice_id": "INV-1004",
+          "due_date": "2026-09-30",
+          "amount": "275.25",
+          "status": "paid",
+          "category": "Utilities",
+          "row_number": 6,
+          "overdue": false
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        },
+        {
+          "vendor": "Northwind Hosting",
+          "invoice_id": "INV-1006",
+          "due_date": "2026-10-30",
+          "amount": "350.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 8,
+          "overdue": false
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1007",
+          "due_date": "2026-09-25",
+          "amount": "125.75",
+          "status": "paid",
+          "category": "Office",
+          "row_number": 9,
+          "overdue": false
+        }
+      ],
+      "duplicate_invoices": [
+        {
+          "invoice_id": "INV-1001",
+          "count": 2,
+          "row_numbers": [
+            2,
+            4
+          ],
+          "rows": [
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 2,
+              "overdue": true
+            },
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 4,
+              "overdue": true
+            }
+          ]
+        }
+      ],
+      "overdue_rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        }
+      ],
+      "sources": [
+        {
+          "document": "invoices.csv",
+          "type": "csv",
+          "synthetic": true
+        }
+      ],
+      "synthetic": true,
+      "answer": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.\n\nConfirmed duplicate IDs: INV-1001. Raw overdue total: $4950.50; deduplicated overdue total: $3750.50.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1917.46,
+      "inference_wait_ms": 0.01,
+      "usage": {
+        "prompt_tokens": 423,
+        "completion_tokens": 81,
+        "total_tokens": 504
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "structured": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "grounded_narrative": {
+        "summary": "Review duplicate invoice records before processing. Prioritize overdue unpaid invoices for collection.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "narrative_validation": "Exact duplicate IDs and Decimal money strings verified; qualitative model guidance contains no numeric claims.",
+      "narrative_attempts": 1,
+      "tool": "analyze_invoices",
+      "narrative_label": "Local Nemotron narrative; exact calculations shown separately"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 3595.26,
+      "inference_latency_ms": 1917.46,
+      "inference_wait_ms": 0.01,
+      "tokens": 504,
+      "prompt_tokens": 423,
+      "completion_tokens": 81,
+      "model": "nemotron3:33b",
+      "processing_ms": 1918.03
+    }
+  },
+  {
+    "id": "7ca303d0-66cb-4d95-a4ca-85239034e77e",
+    "agent_id": "finance",
+    "type": "finance",
+    "prompt": "Analyze this fictional invoice ledger for duplicates and overdue totals.",
+    "priority": "standard",
+    "status": "completed",
+    "created_at": "2026-10-11T02:53:09.046426+00:00",
+    "started_at": "2026-10-11T02:53:14.537497+00:00",
+    "completed_at": "2026-10-11T02:53:16.419170+00:00",
+    "result": {
+      "calculations": {
+        "as_of": "2026-10-10",
+        "currency": "USD",
+        "row_count": 8,
+        "total_amount": "6601.50",
+        "outstanding_total": "6200.50",
+        "overdue_total": "4950.50",
+        "overdue_count": 4,
+        "duplicate_id_count": 1,
+        "deduplicated_outstanding_total": "5000.50",
+        "deduplicated_overdue_total": "3750.50",
+        "method": "Exact Decimal sums; unpaid and due_date < as_of; deduplicated figures retain the first CSV record per invoice_id. Inspect conflicting duplicate rows before acting."
+      },
+      "rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Bright Studio",
+          "invoice_id": "INV-1003",
+          "due_date": "2026-10-20",
+          "amount": "900.00",
+          "status": "unpaid",
+          "category": "Design",
+          "row_number": 5,
+          "overdue": false
+        },
+        {
+          "vendor": "Pacific Utilities",
+          "invoice_id": "INV-1004",
+          "due_date": "2026-09-30",
+          "amount": "275.25",
+          "status": "paid",
+          "category": "Utilities",
+          "row_number": 6,
+          "overdue": false
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        },
+        {
+          "vendor": "Northwind Hosting",
+          "invoice_id": "INV-1006",
+          "due_date": "2026-10-30",
+          "amount": "350.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 8,
+          "overdue": false
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1007",
+          "due_date": "2026-09-25",
+          "amount": "125.75",
+          "status": "paid",
+          "category": "Office",
+          "row_number": 9,
+          "overdue": false
+        }
+      ],
+      "duplicate_invoices": [
+        {
+          "invoice_id": "INV-1001",
+          "count": 2,
+          "row_numbers": [
+            2,
+            4
+          ],
+          "rows": [
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 2,
+              "overdue": true
+            },
+            {
+              "vendor": "Harbor Cloud",
+              "invoice_id": "INV-1001",
+              "due_date": "2026-09-15",
+              "amount": "1200.00",
+              "status": "unpaid",
+              "category": "Software",
+              "row_number": 4,
+              "overdue": true
+            }
+          ]
+        }
+      ],
+      "overdue_rows": [
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 2,
+          "overdue": true
+        },
+        {
+          "vendor": "Cedar Supplies",
+          "invoice_id": "INV-1002",
+          "due_date": "2026-10-01",
+          "amount": "450.50",
+          "status": "unpaid",
+          "category": "Office",
+          "row_number": 3,
+          "overdue": true
+        },
+        {
+          "vendor": "Harbor Cloud",
+          "invoice_id": "INV-1001",
+          "due_date": "2026-09-15",
+          "amount": "1200.00",
+          "status": "unpaid",
+          "category": "Software",
+          "row_number": 4,
+          "overdue": true
+        },
+        {
+          "vendor": "Maple Consulting",
+          "invoice_id": "INV-1005",
+          "due_date": "2026-10-05",
+          "amount": "2100.00",
+          "status": "unpaid",
+          "category": "Consulting",
+          "row_number": 7,
+          "overdue": true
+        }
+      ],
+      "sources": [
+        {
+          "document": "invoices.csv",
+          "type": "csv",
+          "synthetic": true
+        }
+      ],
+      "synthetic": true,
+      "answer": "Review duplicate invoice records before proceeding. Prioritize collecting overdue unpaid invoices.\n\nConfirmed duplicate IDs: INV-1001. Raw overdue total: $4950.50; deduplicated overdue total: $3750.50.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1877.98,
+      "inference_wait_ms": 0.0,
+      "usage": {
+        "prompt_tokens": 423,
+        "completion_tokens": 76,
+        "total_tokens": 499
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "structured": {
+        "summary": "Review duplicate invoice records before proceeding. Prioritize collecting overdue unpaid invoices.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "grounded_narrative": {
+        "summary": "Review duplicate invoice records before proceeding. Prioritize collecting overdue unpaid invoices.",
+        "duplicate_invoice_ids": [
+          "INV-1001"
+        ],
+        "overdue_total": "4950.50",
+        "deduplicated_overdue_total": "3750.50"
+      },
+      "narrative_validation": "Exact duplicate IDs and Decimal money strings verified; qualitative model guidance contains no numeric claims.",
+      "narrative_attempts": 1,
+      "tool": "analyze_invoices",
+      "narrative_label": "Local Nemotron narrative; exact calculations shown separately"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 5491.07,
+      "inference_latency_ms": 1877.98,
+      "inference_wait_ms": 0.0,
+      "tokens": 499,
+      "prompt_tokens": 423,
+      "completion_tokens": 76,
+      "model": "nemotron3:33b",
+      "processing_ms": 1878.4
+    }
+  }
+]

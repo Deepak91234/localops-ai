@@ -1,0 +1,9 @@
+vendor,invoice_id,due_date,amount,status,category
+Harbor Cloud,INV-1001,2026-09-15,1200.00,unpaid,Software
+Cedar Supplies,INV-1002,2026-10-01,450.50,unpaid,Office
+Harbor Cloud,INV-1001,2026-09-15,1200.00,unpaid,Software
+Bright Studio,INV-1003,2026-10-20,900.00,unpaid,Design
+Pacific Utilities,INV-1004,2026-09-30,275.25,paid,Utilities
+Maple Consulting,INV-1005,2026-10-05,2100.00,unpaid,Consulting
+Northwind Hosting,INV-1006,2026-10-30,350.00,unpaid,Software
+Cedar Supplies,INV-1007,2026-09-25,125.75,paid,Office

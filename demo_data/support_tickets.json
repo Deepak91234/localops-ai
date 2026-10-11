@@ -1,0 +1,5 @@
+[
+  {"id":"TKT-001","priority":"urgent","subject":"Demo client cannot access the client portal","request":"I am locked out of the fictional client portal. Can you help me regain access?"},
+  {"id":"TKT-002","priority":"standard","subject":"Demo invoice clarification","request":"Could you explain the Software line on our fictional monthly invoice?"},
+  {"id":"TKT-003","priority":"standard","subject":"Schedule an onboarding session","request":"We would like an onboarding session next week for our fictional team."}
+]

@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-11T03:04:18.712Z",
+  "url": "http://127.0.0.1:8000/",
+  "checks": {
+    "world_list_world": "passed",
+    "world_monitor_world": "passed",
+    "reduced_motion_toggle": "passed",
+    "camera_orbit": "passed",
+    "mobile_world_and_finance_drawer": "passed"
+  },
+  "mobile_world_bounds": {
+    "bodyWidth": 390,
+    "canvasCount": 1,
+    "scrollWidth": 390,
+    "viewport": 390
+  },
+  "mobile_drawer_bounds": {
+    "bodyWidth": 390,
+    "scrollWidth": 390,
+    "viewport": 390
+  },
+  "console_errors_and_warnings": [],
+  "viewport_override": "reset"
+}
