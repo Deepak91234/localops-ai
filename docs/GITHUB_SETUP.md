@@ -1,6 +1,6 @@
 # GitHub and other devices
 
-The public GitHub repository contains the application source, tests, documentation, and dependency lockfiles. The live SQLite database, uploaded business documents, API tokens, `.env`, local dependencies, and recoverable project backups stay on this GX10 and are ignored by Git. The archived demonstration fixtures are included only because the automated tests explicitly use them.
+The public repository is [Deepak91234/localops-ai](https://github.com/Deepak91234/localops-ai). It contains the application source, tests, documentation, and dependency lockfiles. The live SQLite database, uploaded business documents, API tokens, `.env`, local dependencies, and recoverable project backups stay on this GX10 and are ignored by Git. The archived demonstration fixtures are included only because the automated tests explicitly use them.
 
 ## First upload
 
@@ -32,7 +32,18 @@ If it already contains commits, fetch and review its branch history before pushi
 
 ## Use the code on another device
 
+Public cloning does not require signing in to GitHub:
+
+```bash
+git clone https://github.com/Deepak91234/localops-ai.git
+cd localops-ai
+./scripts/bootstrap.sh
+./scripts/start.sh
+```
+
 Clone the repository, then run `./scripts/bootstrap.sh` to install the locked Python/npm dependencies and build the browser application. Set up a supported local Ollama/Nemotron inference endpoint and start with `./scripts/start.sh`. The transient `./scripts/service.sh` launcher requires a Linux systemd user session. Hardware, device telemetry, and the current model are verified on this Ubuntu ARM64 GX10; other hardware may need separate setup.
+
+The model must be installed separately. Configure its actual loopback endpoint and model identifier using `.env.example` as the template. Image and scanned-PDF text recognition also require the local `tesseract` executable; unavailable OCR is reported in source reading status.
 
 GitHub stores the source and does not host the running FastAPI application or GX10 inference service. `127.0.0.1` refers to the device where the browser is running. GitHub Pages cannot run this backend. Accessing the running GX10 app from another device requires a separately configured secure network connection and application access controls; the present app deliberately accepts only loopback hosts/origins.
 

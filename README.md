@@ -2,6 +2,8 @@
 
 **Your private AI workforce, in one living workspace.** A working local application for the ASUS GX10: original animated 3D agents, individual workspaces, reusable knowledge uploads and connections, real local Nemotron responses, a durable job queue, inspectable evidence, measured recommendations, and deterministic tool permissions. Normal agent answers use the knowledge you supply; archived handoff and earlier demonstration records are not automatically used.
 
+Source repository: [Deepak91234/localops-ai](https://github.com/Deepak91234/localops-ai). See [setup on another device](docs/GITHUB_SETUP.md) for cloning and local runtime requirements. Uploaded documents and saved tasks stay on your own device.
+
 ## Run on the verified GX10
 
 The project is at `/home/asus/Downloads/localops-ai`. Tested machine/runtime details are in [ACCESS_REPORT.md](docs/ACCESS_REPORT.md) and [LOCAL_INFERENCE_PROOF.md](docs/LOCAL_INFERENCE_PROOF.md): Ubuntu 24.04.4 ARM64, NVIDIA GB10, Python 3.12.3, Node 24.15.0, Ollama 0.23.2, and cached `nemotron3:33b`. No Docker or cloud inference is required.
