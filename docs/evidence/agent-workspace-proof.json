@@ -1,0 +1,1630 @@
+{
+  "date": "2026-10-10",
+  "agent_creation": {
+    "before": 11,
+    "after": 12,
+    "observed_browser_characters": 12,
+    "new_agent_id": "support-c6e1cbb0"
+  },
+  "support_job": {
+    "id": "f4ae263e-3afe-4739-a76b-7e1311310451",
+    "agent_id": "support-c6e1cbb0",
+    "type": "support",
+    "prompt": "A fictional customer is locked out of the client portal before a meeting. Draft a helpful response using the local support playbook.",
+    "priority": "urgent",
+    "status": "completed",
+    "created_at": "2026-10-11T04:34:00.594664+00:00",
+    "started_at": "2026-10-11T04:34:00.621786+00:00",
+    "completed_at": "2026-10-11T04:34:05.398544+00:00",
+    "result": {
+      "answer": "Hello,\n\nI\u2019m sorry you\u2019re unable to access the client portal. To get you back in quickly, could you let me know:\n\n1.\u202fWhat error message (if any) you see on the sign\u2011in page.  \n2.\u202fWhether the issue is affecting just your account or the entire team.\n\nIn the meantime, please try the **Forgot password** link on the portal\u2019s sign\u2011in page. A reset email will be sent to the address on file\u2014just be sure to check your spam folder if you don\u2019t see it.\n\nIf the reset email still doesn\u2019t arrive, let me know the email address you\u2019re using (without sharing any passwords or recovery codes), and I\u2019ll help verify that it\u2019s the correct address.\n\nOnce we confirm your identity, you\u2019ll be able to reset your password and regain access before your meeting.\n\nThank you for your patience.  \n\n\u2014 Avery, Support Team\n\nRetrieved knowledge references: [1] support_playbook.txt \u00b7 page 1; [2] support_playbook.txt \u00b7 page 3; [3] support_playbook.txt \u00b7 page 4.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 4747.58,
+      "inference_wait_ms": 0.01,
+      "usage": {
+        "prompt_tokens": 812,
+        "completion_tokens": 189,
+        "total_tokens": 1001
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "sources": [
+        {
+          "id": "1",
+          "document": "support_playbook.txt",
+          "page": 1,
+          "snippet": "ACCOUNT ACCESS AND PASSWORD RESET\nIf a customer cannot access the client portal, first ask whether they see an error message and whether the problem affects one user or the whole team. Ask the customer to use the Forgot password link on the portal sign-in page. Never ask for a password, recovery code, or full payment details. If a reset email does not arrive, ask them to check spam and confirm the account email without posting confidential credentials. A draft response does not unlock an account or send an email.",
+          "synthetic": true
+        },
+        {
+          "id": "2",
+          "document": "support_playbook.txt",
+          "page": 3,
+          "snippet": "INVOICE AND BILLING QUESTIONS\nFor invoice clarification, ask for the fictional invoice ID and the disputed line item. Explain only details that appear in the local invoice evidence. Finance must review duplicate charges before any payment decision. Support must not initiate payments, change bank details, issue refunds, or promise a refund. This demo contains no refund eligibility policy.",
+          "synthetic": true
+        },
+        {
+          "id": "3",
+          "document": "support_playbook.txt",
+          "page": 4,
+          "snippet": "ONBOARDING AND MISSING INFORMATION\nFor an onboarding request, ask for the team's preferred dates, approximate team size, and topics to cover. A human coordinator confirms availability. If a policy question is not answered by this playbook, explicitly say the local knowledge does not specify it and ask a human support lead; never invent service-level guarantees, opening hours, warranty terms, or data-retention rules.",
+          "synthetic": true
+        }
+      ],
+      "context_sources": [
+        {
+          "document": "support_tickets.json",
+          "type": "json",
+          "synthetic": true
+        }
+      ],
+      "retrieval": "local SQLite FTS5",
+      "knowledge_found": true,
+      "draft_only": true,
+      "synthetic": true,
+      "tool": "draft_support_reply",
+      "citation_origin": "retriever"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 27.12,
+      "inference_latency_ms": 4747.58,
+      "inference_wait_ms": 0.01,
+      "tokens": 1001,
+      "prompt_tokens": 812,
+      "completion_tokens": 189,
+      "model": "nemotron3:33b",
+      "processing_ms": 4774.28
+    }
+  },
+  "support_insights": {
+    "agent": {
+      "name": "Avery",
+      "role": "support",
+      "purpose": "Draft helpful customer replies using our fictional support playbook.",
+      "tools": [
+        "draft_support_reply"
+      ],
+      "source": "support_playbook.txt",
+      "id": "support-c6e1cbb0",
+      "status": "idle",
+      "enabled": true,
+      "created_at": "2026-10-11T04:33:39.672126+00:00",
+      "last_activity_at": "2026-10-11T04:34:05.402175+00:00",
+      "pause_pending": false,
+      "paused_at": "2026-10-11T04:40:19.230968+00:00",
+      "resumed_at": "2026-10-11T04:40:25.477395+00:00"
+    },
+    "generated_at": "2026-10-11T04:40:54.261646+00:00",
+    "workload": {
+      "total_jobs": 1,
+      "completed_jobs": 1,
+      "queued_jobs": 0,
+      "running_jobs": 0,
+      "failed_jobs": 0,
+      "total_tokens": 1001,
+      "reported_token_jobs": 1,
+      "mean_queue_wait_ms": 27.12,
+      "mean_inference_latency_ms": 4747.58,
+      "mean_processing_ms": 4774.28,
+      "processing_total_ms": 4774.28,
+      "measured_processing_jobs": 1,
+      "last_activity_at": "2026-10-11T04:34:05.398544+00:00",
+      "idle_seconds": 408.9,
+      "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+    },
+    "queue": {
+      "policy": "priority",
+      "positions": [],
+      "paused_jobs_count": 0
+    },
+    "sources": [
+      {
+        "id": "support_playbook.txt",
+        "name": "support_playbook.txt",
+        "available": true,
+        "role": "support",
+        "synthetic": true,
+        "page_count": 4
+      },
+      {
+        "id": "support_tickets.json",
+        "name": "support_tickets.json",
+        "available": true,
+        "role": "support",
+        "synthetic": true,
+        "page_count": null
+      }
+    ],
+    "permissions": {
+      "allowed_tools": [
+        "draft_support_reply"
+      ],
+      "blocked_tools": [
+        "network.export",
+        "shell",
+        "execute_code",
+        "send_email",
+        "make_payment",
+        "delete_file"
+      ],
+      "enforced": true,
+      "external_actions": false
+    },
+    "recommendations": [
+      {
+        "id": "support-c6e1cbb0:pause",
+        "title": "Pause unused work intake",
+        "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+        "evidence": {
+          "total_jobs": 1,
+          "last_activity_at": "2026-10-11T04:34:05.398544+00:00",
+          "idle_seconds": 408.9
+        },
+        "action": {
+          "type": "pause_agent",
+          "agent_id": "support-c6e1cbb0"
+        },
+        "requires_approval": true
+      }
+    ],
+    "cost": {
+      "configured": false,
+      "hourly_rate_usd": null,
+      "estimated_compute_cost_usd": null,
+      "worker_seconds": 4.77428,
+      "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+      "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+    },
+    "role_details": {
+      "kind": "support_rag",
+      "document": "support_playbook.txt",
+      "retrieval": "local SQLite FTS5",
+      "latest_sources": [
+        {
+          "id": "1",
+          "document": "support_playbook.txt",
+          "page": 1,
+          "snippet": "ACCOUNT ACCESS AND PASSWORD RESET\nIf a customer cannot access the client portal, first ask whether they see an error message and whether the problem affects one user or the whole team. Ask the customer to use the Forgot password link on the portal sign-in page. Never ask for a password, recovery code, or full payment details. If a reset email does not arrive, ask them to check spam and confirm the account email without posting confidential credentials. A draft response does not unlock an account or send an email.",
+          "synthetic": true
+        },
+        {
+          "id": "2",
+          "document": "support_playbook.txt",
+          "page": 3,
+          "snippet": "INVOICE AND BILLING QUESTIONS\nFor invoice clarification, ask for the fictional invoice ID and the disputed line item. Explain only details that appear in the local invoice evidence. Finance must review duplicate charges before any payment decision. Support must not initiate payments, change bank details, issue refunds, or promise a refund. This demo contains no refund eligibility policy.",
+          "synthetic": true
+        },
+        {
+          "id": "3",
+          "document": "support_playbook.txt",
+          "page": 4,
+          "snippet": "ONBOARDING AND MISSING INFORMATION\nFor an onboarding request, ask for the team's preferred dates, approximate team size, and topics to cover. A human coordinator confirms availability. If a policy question is not answered by this playbook, explicitly say the local knowledge does not specify it and ask a human support lead; never invent service-level guarantees, opening hours, warranty terms, or data-retention rules.",
+          "synthetic": true
+        }
+      ],
+      "knowledge_sources": [
+        "support_playbook.txt",
+        "support_tickets.json"
+      ],
+      "draft_only": true
+    }
+  },
+  "control": {
+    "pause_observed": true,
+    "paused_new_job_status": 409,
+    "resume_observed": true,
+    "history_retained": true,
+    "optimizer_ui_pause_resume_observed": true
+  },
+  "optimizer_insights": {
+    "agent": {
+      "id": "optimizer",
+      "name": "Orbit",
+      "role": "optimizer",
+      "purpose": "Measure queue performance and propose approved scheduling changes.",
+      "tools": [
+        "measure_scheduler"
+      ],
+      "source": "scheduler_microbenchmark",
+      "status": "completed",
+      "enabled": true,
+      "created_at": null,
+      "last_activity_at": "2026-10-11T04:40:35.015909+00:00"
+    },
+    "generated_at": "2026-10-11T04:40:54.257965+00:00",
+    "workload": {
+      "total_jobs": 0,
+      "completed_jobs": 0,
+      "queued_jobs": 0,
+      "running_jobs": 0,
+      "failed_jobs": 0,
+      "total_tokens": 0,
+      "reported_token_jobs": 0,
+      "mean_queue_wait_ms": null,
+      "mean_inference_latency_ms": null,
+      "mean_processing_ms": null,
+      "processing_total_ms": 0,
+      "measured_processing_jobs": 0,
+      "last_activity_at": null,
+      "idle_seconds": null,
+      "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+    },
+    "queue": {
+      "policy": "priority",
+      "positions": [],
+      "paused_jobs_count": 0
+    },
+    "sources": [
+      {
+        "id": "scheduler_microbenchmark",
+        "name": "Measured scheduler microbenchmark",
+        "available": true,
+        "role": "optimizer",
+        "synthetic": true,
+        "page_count": null,
+        "kind": "internal_workload"
+      }
+    ],
+    "permissions": {
+      "allowed_tools": [
+        "measure_scheduler"
+      ],
+      "blocked_tools": [
+        "network.export",
+        "shell",
+        "execute_code",
+        "send_email",
+        "make_payment",
+        "delete_file"
+      ],
+      "enforced": true,
+      "external_actions": false
+    },
+    "recommendations": [
+      {
+        "id": "optimizer:observe",
+        "title": "Keep collecting measured evidence",
+        "explanation": "There is no observed issue requiring an automatic change. Use this agent's own task history and source evidence to decide the next request.",
+        "evidence": {
+          "completed_jobs": 0,
+          "mean_processing_ms": null
+        },
+        "action": {
+          "type": "review_jobs",
+          "agent_id": "optimizer"
+        },
+        "requires_approval": false
+      }
+    ],
+    "cost": {
+      "configured": false,
+      "hourly_rate_usd": null,
+      "estimated_compute_cost_usd": null,
+      "worker_seconds": 0.0,
+      "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+      "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+    },
+    "role_details": {
+      "kind": "allocation_review",
+      "agents": [
+        {
+          "agent": {
+            "id": "hr",
+            "name": "Harper",
+            "role": "hr",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 3,
+            "completed_jobs": 3,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 1371,
+            "reported_token_jobs": 3,
+            "mean_queue_wait_ms": 4.6,
+            "mean_inference_latency_ms": 3123.2,
+            "mean_processing_ms": 3125.13,
+            "processing_total_ms": 9375.39,
+            "measured_processing_jobs": 3,
+            "last_activity_at": "2026-10-11T02:56:50.263803+00:00",
+            "idle_seconds": 6244.0,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 9.37539,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr-24dce258",
+                  "hr-558571e6",
+                  "hr-2da7d280",
+                  "hr-ed106cd5",
+                  "hr-63e1f709"
+                ],
+                "this_agent_jobs": 3
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 3,
+                "last_activity_at": "2026-10-11T02:56:50.263803+00:00",
+                "idle_seconds": 6244.0
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "finance",
+            "name": "Finley",
+            "role": "finance",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 9,
+            "completed_jobs": 8,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 1,
+            "total_tokens": 4225,
+            "reported_token_jobs": 8,
+            "mean_queue_wait_ms": 1014.74,
+            "mean_inference_latency_ms": 1858.41,
+            "mean_processing_ms": 2045.5,
+            "processing_total_ms": 18409.47,
+            "measured_processing_jobs": 9,
+            "last_activity_at": "2026-10-11T04:29:57.388863+00:00",
+            "idle_seconds": 656.9,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 18.40947,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "finance:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 9,
+                "last_activity_at": "2026-10-11T04:29:57.388863+00:00",
+                "idle_seconds": 656.9
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "finance"
+              },
+              "requires_approval": true
+            },
+            {
+              "id": "finance:errors",
+              "title": "Inspect failed requests first",
+              "explanation": "Review this agent's own errors and source availability before submitting a larger batch.",
+              "evidence": {
+                "failed_jobs": 1
+              },
+              "action": {
+                "type": "review_jobs",
+                "agent_id": "finance"
+              },
+              "requires_approval": false
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "support",
+            "name": "Scout",
+            "role": "support",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 3,
+            "completed_jobs": 3,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 1167,
+            "reported_token_jobs": 3,
+            "mean_queue_wait_ms": 612.74,
+            "mean_inference_latency_ms": 1647.16,
+            "mean_processing_ms": 1656.23,
+            "processing_total_ms": 4968.69,
+            "measured_processing_jobs": 3,
+            "last_activity_at": "2026-10-11T02:56:54.279194+00:00",
+            "idle_seconds": 6240.0,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 4.96869,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "support:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "support-6efed5c1"
+                ],
+                "this_agent_jobs": 3
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "support"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "support:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 3,
+                "last_activity_at": "2026-10-11T02:56:54.279194+00:00",
+                "idle_seconds": 6240.0
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "support"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "security",
+            "name": "Sentinel",
+            "role": "security",
+            "status": "blocked",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 0,
+            "completed_jobs": 0,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 0,
+            "reported_token_jobs": 0,
+            "mean_queue_wait_ms": null,
+            "mean_inference_latency_ms": null,
+            "mean_processing_ms": null,
+            "processing_total_ms": 0,
+            "measured_processing_jobs": 0,
+            "last_activity_at": null,
+            "idle_seconds": null,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 0.0,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "security:observe",
+              "title": "Keep collecting measured evidence",
+              "explanation": "There is no observed issue requiring an automatic change. Use this agent's own task history and source evidence to decide the next request.",
+              "evidence": {
+                "completed_jobs": 0,
+                "mean_processing_ms": null
+              },
+              "action": {
+                "type": "review_jobs",
+                "agent_id": "security"
+              },
+              "requires_approval": false
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "optimizer",
+            "name": "Orbit",
+            "role": "optimizer",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 0,
+            "completed_jobs": 0,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 0,
+            "reported_token_jobs": 0,
+            "mean_queue_wait_ms": null,
+            "mean_inference_latency_ms": null,
+            "mean_processing_ms": null,
+            "processing_total_ms": 0,
+            "measured_processing_jobs": 0,
+            "last_activity_at": null,
+            "idle_seconds": null,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 0.0,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "optimizer:observe",
+              "title": "Keep collecting measured evidence",
+              "explanation": "There is no observed issue requiring an automatic change. Use this agent's own task history and source evidence to decide the next request.",
+              "evidence": {
+                "completed_jobs": 0,
+                "mean_processing_ms": null
+              },
+              "action": {
+                "type": "review_jobs",
+                "agent_id": "optimizer"
+              },
+              "requires_approval": false
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "hr-24dce258",
+            "name": "Policy companion",
+            "role": "hr",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 1,
+            "completed_jobs": 1,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 260,
+            "reported_token_jobs": 1,
+            "mean_queue_wait_ms": 3.8,
+            "mean_inference_latency_ms": 673.13,
+            "mean_processing_ms": 673.76,
+            "processing_total_ms": 673.76,
+            "measured_processing_jobs": 1,
+            "last_activity_at": "2026-10-11T02:53:46.239406+00:00",
+            "idle_seconds": 6428.0,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 0.67376,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr-24dce258:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr",
+                  "hr-558571e6",
+                  "hr-2da7d280",
+                  "hr-ed106cd5",
+                  "hr-63e1f709"
+                ],
+                "this_agent_jobs": 1
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr-24dce258"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr-24dce258:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 1,
+                "last_activity_at": "2026-10-11T02:53:46.239406+00:00",
+                "idle_seconds": 6428.0
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr-24dce258"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "hr-558571e6",
+            "name": "Connection check",
+            "role": "hr",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 1,
+            "completed_jobs": 1,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 505,
+            "reported_token_jobs": 1,
+            "mean_queue_wait_ms": 2.9,
+            "mean_inference_latency_ms": 7405.26,
+            "mean_processing_ms": 7406.04,
+            "processing_total_ms": 7406.04,
+            "measured_processing_jobs": 1,
+            "last_activity_at": "2026-10-11T04:01:36.207534+00:00",
+            "idle_seconds": 2358.1,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 7.40604,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr-558571e6:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr",
+                  "hr-24dce258",
+                  "hr-2da7d280",
+                  "hr-ed106cd5",
+                  "hr-63e1f709"
+                ],
+                "this_agent_jobs": 1
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr-558571e6"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr-558571e6:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 1,
+                "last_activity_at": "2026-10-11T04:01:36.207534+00:00",
+                "idle_seconds": 2358.1
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr-558571e6"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "hr-2da7d280",
+            "name": "Recovery check",
+            "role": "hr",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 1,
+            "completed_jobs": 1,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 345,
+            "reported_token_jobs": 1,
+            "mean_queue_wait_ms": 7.33,
+            "mean_inference_latency_ms": 1378.63,
+            "mean_processing_ms": 1379.84,
+            "processing_total_ms": 1379.84,
+            "measured_processing_jobs": 1,
+            "last_activity_at": "2026-10-11T04:04:13.595218+00:00",
+            "idle_seconds": 2200.7,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 1.37984,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr-2da7d280:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr",
+                  "hr-24dce258",
+                  "hr-558571e6",
+                  "hr-ed106cd5",
+                  "hr-63e1f709"
+                ],
+                "this_agent_jobs": 1
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr-2da7d280"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr-2da7d280:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 1,
+                "last_activity_at": "2026-10-11T04:04:13.595218+00:00",
+                "idle_seconds": 2200.7
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr-2da7d280"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "hr-ed106cd5",
+            "name": "Policy companion",
+            "role": "hr",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 1,
+            "completed_jobs": 1,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 505,
+            "reported_token_jobs": 1,
+            "mean_queue_wait_ms": 26.58,
+            "mean_inference_latency_ms": 782.73,
+            "mean_processing_ms": 783.37,
+            "processing_total_ms": 783.37,
+            "measured_processing_jobs": 1,
+            "last_activity_at": "2026-10-11T04:05:28.981271+00:00",
+            "idle_seconds": 2125.3,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 0.78337,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr-ed106cd5:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr",
+                  "hr-24dce258",
+                  "hr-558571e6",
+                  "hr-2da7d280",
+                  "hr-63e1f709"
+                ],
+                "this_agent_jobs": 1
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr-ed106cd5"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr-ed106cd5:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 1,
+                "last_activity_at": "2026-10-11T04:05:28.981271+00:00",
+                "idle_seconds": 2125.3
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr-ed106cd5"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "support-6efed5c1",
+            "name": "Policy companion",
+            "role": "support",
+            "status": "completed",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 2,
+            "completed_jobs": 2,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 868,
+            "reported_token_jobs": 2,
+            "mean_queue_wait_ms": 5.05,
+            "mean_inference_latency_ms": 1675.56,
+            "mean_processing_ms": 1683.25,
+            "processing_total_ms": 3366.5,
+            "measured_processing_jobs": 2,
+            "last_activity_at": "2026-10-11T04:08:51.300087+00:00",
+            "idle_seconds": 1923.0,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 3.3665,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "support-6efed5c1:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "support"
+                ],
+                "this_agent_jobs": 2
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "support-6efed5c1"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "support-6efed5c1:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 2,
+                "last_activity_at": "2026-10-11T04:08:51.300087+00:00",
+                "idle_seconds": 1923.0
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "support-6efed5c1"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "hr-63e1f709",
+            "name": "Policy companion",
+            "role": "hr",
+            "status": "idle",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 0,
+            "completed_jobs": 0,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 0,
+            "reported_token_jobs": 0,
+            "mean_queue_wait_ms": null,
+            "mean_inference_latency_ms": null,
+            "mean_processing_ms": null,
+            "processing_total_ms": 0,
+            "measured_processing_jobs": 0,
+            "last_activity_at": null,
+            "idle_seconds": null,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 0.0,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "hr-63e1f709:overlap",
+              "title": "Review overlapping agent templates",
+              "explanation": "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.",
+              "evidence": {
+                "same_role_source_agent_ids": [
+                  "hr",
+                  "hr-24dce258",
+                  "hr-558571e6",
+                  "hr-2da7d280",
+                  "hr-ed106cd5"
+                ],
+                "this_agent_jobs": 0
+              },
+              "action": {
+                "type": "review_agents",
+                "agent_id": "hr-63e1f709"
+              },
+              "requires_approval": false
+            },
+            {
+              "id": "hr-63e1f709:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 0,
+                "last_activity_at": null,
+                "idle_seconds": null
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "hr-63e1f709"
+              },
+              "requires_approval": true
+            }
+          ]
+        },
+        {
+          "agent": {
+            "id": "support-c6e1cbb0",
+            "name": "Avery",
+            "role": "support",
+            "status": "idle",
+            "enabled": true
+          },
+          "workload": {
+            "total_jobs": 1,
+            "completed_jobs": 1,
+            "queued_jobs": 0,
+            "running_jobs": 0,
+            "failed_jobs": 0,
+            "total_tokens": 1001,
+            "reported_token_jobs": 1,
+            "mean_queue_wait_ms": 27.12,
+            "mean_inference_latency_ms": 4747.58,
+            "mean_processing_ms": 4774.28,
+            "processing_total_ms": 4774.28,
+            "measured_processing_jobs": 1,
+            "last_activity_at": "2026-10-11T04:34:05.398544+00:00",
+            "idle_seconds": 408.9,
+            "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+          },
+          "cost": {
+            "configured": false,
+            "hourly_rate_usd": null,
+            "estimated_compute_cost_usd": null,
+            "worker_seconds": 4.77428,
+            "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+            "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+          },
+          "recommendations": [
+            {
+              "id": "support-c6e1cbb0:pause",
+              "title": "Pause unused work intake",
+              "explanation": "This agent has no active or queued work. Pausing prevents new submissions while keeping its history. It does not reclaim a private GPU partition or unload the shared Nemotron model.",
+              "evidence": {
+                "total_jobs": 1,
+                "last_activity_at": "2026-10-11T04:34:05.398544+00:00",
+                "idle_seconds": 408.9
+              },
+              "action": {
+                "type": "pause_agent",
+                "agent_id": "support-c6e1cbb0"
+              },
+              "requires_approval": true
+            }
+          ]
+        }
+      ],
+      "latest_comparison": {
+        "kind": "measured_scheduler_microbenchmark",
+        "label": "Measured scheduler microbenchmark \u00b7 synthetic timed jobs \u00b7 no inference or GPU claims",
+        "workload": [
+          {
+            "id": "invoice-1",
+            "type": "finance",
+            "priority": "standard",
+            "service_ms": 120
+          },
+          {
+            "id": "invoice-2",
+            "type": "finance",
+            "priority": "standard",
+            "service_ms": 100
+          },
+          {
+            "id": "support-urgent-1",
+            "type": "support",
+            "priority": "urgent",
+            "service_ms": 30
+          },
+          {
+            "id": "invoice-3",
+            "type": "finance",
+            "priority": "standard",
+            "service_ms": 80
+          },
+          {
+            "id": "support-urgent-2",
+            "type": "support",
+            "priority": "urgent",
+            "service_ms": 40
+          }
+        ],
+        "fifo": {
+          "policy": "fifo",
+          "jobs": [
+            {
+              "id": "invoice-1",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 120,
+              "started_at_ms": 0.0,
+              "completed_at_ms": 121.13,
+              "queue_wait_ms": 0.0,
+              "processing_ms": 121.13
+            },
+            {
+              "id": "invoice-2",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 100,
+              "started_at_ms": 121.14,
+              "completed_at_ms": 221.95,
+              "queue_wait_ms": 121.14,
+              "processing_ms": 100.81
+            },
+            {
+              "id": "support-urgent-1",
+              "type": "support",
+              "priority": "urgent",
+              "service_ms": 30,
+              "started_at_ms": 221.96,
+              "completed_at_ms": 253.6,
+              "queue_wait_ms": 221.96,
+              "processing_ms": 31.64
+            },
+            {
+              "id": "invoice-3",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 80,
+              "started_at_ms": 253.61,
+              "completed_at_ms": 334.36,
+              "queue_wait_ms": 253.61,
+              "processing_ms": 80.75
+            },
+            {
+              "id": "support-urgent-2",
+              "type": "support",
+              "priority": "urgent",
+              "service_ms": 40,
+              "started_at_ms": 334.37,
+              "completed_at_ms": 374.6,
+              "queue_wait_ms": 334.37,
+              "processing_ms": 40.23
+            }
+          ],
+          "mean_wait_ms": 186.22,
+          "urgent_mean_wait_ms": 278.17,
+          "total_duration_ms": 374.7
+        },
+        "priority": {
+          "policy": "priority",
+          "jobs": [
+            {
+              "id": "invoice-1",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 120,
+              "started_at_ms": 0.0,
+              "completed_at_ms": 121.54,
+              "queue_wait_ms": 0.0,
+              "processing_ms": 121.54
+            },
+            {
+              "id": "support-urgent-1",
+              "type": "support",
+              "priority": "urgent",
+              "service_ms": 30,
+              "started_at_ms": 121.55,
+              "completed_at_ms": 151.92,
+              "queue_wait_ms": 121.55,
+              "processing_ms": 30.38
+            },
+            {
+              "id": "support-urgent-2",
+              "type": "support",
+              "priority": "urgent",
+              "service_ms": 40,
+              "started_at_ms": 151.94,
+              "completed_at_ms": 193.01,
+              "queue_wait_ms": 151.94,
+              "processing_ms": 41.07
+            },
+            {
+              "id": "invoice-2",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 100,
+              "started_at_ms": 193.02,
+              "completed_at_ms": 293.55,
+              "queue_wait_ms": 193.02,
+              "processing_ms": 100.53
+            },
+            {
+              "id": "invoice-3",
+              "type": "finance",
+              "priority": "standard",
+              "service_ms": 80,
+              "started_at_ms": 293.56,
+              "completed_at_ms": 373.97,
+              "queue_wait_ms": 293.56,
+              "processing_ms": 80.41
+            }
+          ],
+          "mean_wait_ms": 152.01,
+          "urgent_mean_wait_ms": 136.75,
+          "total_duration_ms": 374.04
+        },
+        "improvement": {
+          "urgent_wait_ms": 141.42,
+          "urgent_wait_percent": 50.84,
+          "overall_wait_ms": 34.21
+        },
+        "method": "Same five jobs and same service durations. All are admitted at t=0; invoice-1 starts before policy selection. asyncio.sleep represents timed synthetic work. Actual wall-clock waits measured with perf_counter. Running work is not interrupted. OS scheduling adds timing jitter; this demonstrates queue policy only.",
+        "requires_approval": true,
+        "recommendation": {
+          "answer": "Priority reduced urgent queue wait by 141.42 ms in this synthetic scheduler run. Already-running work completed safely. This is a queue policy measurement, not an inference speed or GPU efficiency claim. Approve priority mode only if urgent response time matters more than standard queue order.",
+          "source": "deterministic"
+        },
+        "id": "def876f0-9040-4dc1-adba-b5616ca2270f",
+        "timestamp": "2026-10-11T04:40:35.013466+00:00",
+        "current_policy": "priority"
+      },
+      "finance_evidence": {
+        "available": true,
+        "origin": "Stored completed Finance job",
+        "source_job_id": "0236e777-f3cd-4b44-b2da-9dde681db4a6",
+        "calculations": {
+          "as_of": "2026-10-10",
+          "currency": "USD",
+          "row_count": 8,
+          "total_amount": "6601.50",
+          "outstanding_total": "6200.50",
+          "overdue_total": "4950.50",
+          "overdue_count": 4,
+          "duplicate_id_count": 1,
+          "deduplicated_outstanding_total": "5000.50",
+          "deduplicated_overdue_total": "3750.50",
+          "method": "Exact Decimal sums; unpaid and due_date < as_of; deduplicated figures retain the first CSV record per invoice_id. Inspect conflicting duplicate rows before acting."
+        },
+        "duplicate_invoices": [
+          {
+            "invoice_id": "INV-1001",
+            "count": 2,
+            "row_numbers": [
+              2,
+              4
+            ],
+            "rows": [
+              {
+                "vendor": "Harbor Cloud",
+                "invoice_id": "INV-1001",
+                "due_date": "2026-09-15",
+                "amount": "1200.00",
+                "status": "unpaid",
+                "category": "Software",
+                "row_number": 2,
+                "overdue": true
+              },
+              {
+                "vendor": "Harbor Cloud",
+                "invoice_id": "INV-1001",
+                "due_date": "2026-09-15",
+                "amount": "1200.00",
+                "status": "unpaid",
+                "category": "Software",
+                "row_number": 4,
+                "overdue": true
+              }
+            ]
+          }
+        ],
+        "overdue_rows": [
+          {
+            "vendor": "Harbor Cloud",
+            "invoice_id": "INV-1001",
+            "due_date": "2026-09-15",
+            "amount": "1200.00",
+            "status": "unpaid",
+            "category": "Software",
+            "row_number": 2,
+            "overdue": true
+          },
+          {
+            "vendor": "Cedar Supplies",
+            "invoice_id": "INV-1002",
+            "due_date": "2026-10-01",
+            "amount": "450.50",
+            "status": "unpaid",
+            "category": "Office",
+            "row_number": 3,
+            "overdue": true
+          },
+          {
+            "vendor": "Harbor Cloud",
+            "invoice_id": "INV-1001",
+            "due_date": "2026-09-15",
+            "amount": "1200.00",
+            "status": "unpaid",
+            "category": "Software",
+            "row_number": 4,
+            "overdue": true
+          },
+          {
+            "vendor": "Maple Consulting",
+            "invoice_id": "INV-1005",
+            "due_date": "2026-10-05",
+            "amount": "2100.00",
+            "status": "unpaid",
+            "category": "Consulting",
+            "row_number": 7,
+            "overdue": true
+          }
+        ],
+        "rows": [
+          {
+            "vendor": "Harbor Cloud",
+            "invoice_id": "INV-1001",
+            "due_date": "2026-09-15",
+            "amount": "1200.00",
+            "status": "unpaid",
+            "category": "Software",
+            "row_number": 2,
+            "overdue": true
+          },
+          {
+            "vendor": "Cedar Supplies",
+            "invoice_id": "INV-1002",
+            "due_date": "2026-10-01",
+            "amount": "450.50",
+            "status": "unpaid",
+            "category": "Office",
+            "row_number": 3,
+            "overdue": true
+          },
+          {
+            "vendor": "Harbor Cloud",
+            "invoice_id": "INV-1001",
+            "due_date": "2026-09-15",
+            "amount": "1200.00",
+            "status": "unpaid",
+            "category": "Software",
+            "row_number": 4,
+            "overdue": true
+          },
+          {
+            "vendor": "Bright Studio",
+            "invoice_id": "INV-1003",
+            "due_date": "2026-10-20",
+            "amount": "900.00",
+            "status": "unpaid",
+            "category": "Design",
+            "row_number": 5,
+            "overdue": false
+          },
+          {
+            "vendor": "Pacific Utilities",
+            "invoice_id": "INV-1004",
+            "due_date": "2026-09-30",
+            "amount": "275.25",
+            "status": "paid",
+            "category": "Utilities",
+            "row_number": 6,
+            "overdue": false
+          },
+          {
+            "vendor": "Maple Consulting",
+            "invoice_id": "INV-1005",
+            "due_date": "2026-10-05",
+            "amount": "2100.00",
+            "status": "unpaid",
+            "category": "Consulting",
+            "row_number": 7,
+            "overdue": true
+          },
+          {
+            "vendor": "Northwind Hosting",
+            "invoice_id": "INV-1006",
+            "due_date": "2026-10-30",
+            "amount": "350.00",
+            "status": "unpaid",
+            "category": "Software",
+            "row_number": 8,
+            "overdue": false
+          },
+          {
+            "vendor": "Cedar Supplies",
+            "invoice_id": "INV-1007",
+            "due_date": "2026-09-25",
+            "amount": "125.75",
+            "status": "paid",
+            "category": "Office",
+            "row_number": 9,
+            "overdue": false
+          }
+        ],
+        "sources": [
+          {
+            "document": "invoices.csv",
+            "type": "csv",
+            "synthetic": true
+          }
+        ]
+      },
+      "note": "Suggestions are deterministic observations from each agent's own stored jobs. Idle pause controls stop work intake, not shared model memory. Only measured scheduler scenarios support scheduling claims."
+    }
+  },
+  "security_insights": {
+    "agent": {
+      "id": "security",
+      "name": "Sentinel",
+      "role": "security",
+      "purpose": "Enforce tool permissions and block unsafe action proposals.",
+      "tools": [
+        "inspect_permissions"
+      ],
+      "source": "injection_policy.txt",
+      "status": "blocked",
+      "enabled": true,
+      "created_at": null,
+      "last_activity_at": "2026-10-11T04:36:17.795681+00:00"
+    },
+    "generated_at": "2026-10-11T04:40:54.260552+00:00",
+    "workload": {
+      "total_jobs": 0,
+      "completed_jobs": 0,
+      "queued_jobs": 0,
+      "running_jobs": 0,
+      "failed_jobs": 0,
+      "total_tokens": 0,
+      "reported_token_jobs": 0,
+      "mean_queue_wait_ms": null,
+      "mean_inference_latency_ms": null,
+      "mean_processing_ms": null,
+      "processing_total_ms": 0,
+      "measured_processing_jobs": 0,
+      "last_activity_at": null,
+      "idle_seconds": null,
+      "scope": "This agent's stored jobs only. Latency, tokens, and worker occupancy are measured request figures; no per-agent GPU use is inferred."
+    },
+    "queue": {
+      "policy": "priority",
+      "positions": [],
+      "paused_jobs_count": 0
+    },
+    "sources": [
+      {
+        "id": "injection_policy.txt",
+        "name": "injection_policy.txt",
+        "available": true,
+        "role": "security",
+        "synthetic": true,
+        "page_count": 1
+      }
+    ],
+    "permissions": {
+      "allowed_tools": [
+        "inspect_permissions"
+      ],
+      "blocked_tools": [
+        "network.export",
+        "shell",
+        "execute_code",
+        "send_email",
+        "make_payment",
+        "delete_file"
+      ],
+      "enforced": true,
+      "external_actions": false
+    },
+    "recommendations": [
+      {
+        "id": "security:observe",
+        "title": "Keep collecting measured evidence",
+        "explanation": "There is no observed issue requiring an automatic change. Use this agent's own task history and source evidence to decide the next request.",
+        "evidence": {
+          "completed_jobs": 0,
+          "mean_processing_ms": null
+        },
+        "action": {
+          "type": "review_jobs",
+          "agent_id": "security"
+        },
+        "requires_approval": false
+      }
+    ],
+    "cost": {
+      "configured": false,
+      "hourly_rate_usd": null,
+      "estimated_compute_cost_usd": null,
+      "worker_seconds": 0.0,
+      "scope": "Estimated compute accounting from this agent's measured worker occupancy",
+      "note": "No hourly rate configured. Actual electricity costs, hardware allocation, payments, and money savings are not measured. Pausing an idle agent does not unload shared model weights."
+    },
+    "role_details": {
+      "kind": "security",
+      "enforcement_features": [
+        {
+          "name": "Role and agent tool allowlists",
+          "enforced": true,
+          "detail": "Every workflow is checked before its audited tool runs."
+        },
+        {
+          "name": "Fixed local data sources",
+          "enforced": true,
+          "detail": "Agent configurations permit only known role-specific filenames; generated paths and code are refused."
+        },
+        {
+          "name": "Loopback request boundary",
+          "enforced": true,
+          "detail": "Remote browser origins, non-loopback Host headers, hosted model URLs, redirects, and environment proxy forwarding are refused."
+        },
+        {
+          "name": "Grounded model evidence",
+          "enforced": true,
+          "detail": "HR/Support citation IDs and Finance exact fact fields are validated. Documents cannot grant new tools."
+        },
+        {
+          "name": "Human approval for queue policy",
+          "enforced": true,
+          "detail": "Policy changes require an explicit approved request. Running work is not preempted."
+        }
+      ],
+      "blocked_events": [
+        {
+          "id": "8de21ff4-9f9a-4522-a416-b2a0d286381b",
+          "type": "security_blocked",
+          "timestamp": "2026-10-11T02:49:58.727737+00:00",
+          "message": "Security Guardian refused network.export from untrusted document text",
+          "agent_id": "security",
+          "job_id": null,
+          "detail": {
+            "requested_agent": "finance",
+            "attempted_tool": "network.export",
+            "reason": "Tool 'network.export' is blocked: it is absent from this agent's allowlist. Network export, payments, shell commands, and file deletion are prohibited.",
+            "executed": false
+          }
+        },
+        {
+          "id": "bc585975-dc89-4639-9b9a-b135054424f7",
+          "type": "security_blocked",
+          "timestamp": "2026-10-11T02:52:45.026579+00:00",
+          "message": "Security Guardian refused network.export from untrusted document text",
+          "agent_id": "security",
+          "job_id": null,
+          "detail": {
+            "requested_agent": "finance",
+            "attempted_tool": "network.export",
+            "reason": "Tool 'network.export' is blocked: it is absent from this agent's allowlist. Network export, payments, shell commands, and file deletion are prohibited.",
+            "executed": false
+          }
+        },
+        {
+          "id": "236bf0ed-36ce-479f-8a68-3fd85b5ccc53",
+          "type": "security_blocked",
+          "timestamp": "2026-10-11T02:56:59.110332+00:00",
+          "message": "Security Guardian refused network.export from untrusted document text",
+          "agent_id": "security",
+          "job_id": null,
+          "detail": {
+            "requested_agent": "finance",
+            "attempted_tool": "network.export",
+            "reason": "Tool 'network.export' is blocked: it is absent from this agent's allowlist. Network export, payments, shell commands, and file deletion are prohibited.",
+            "executed": false
+          }
+        },
+        {
+          "id": "c0440f45-0f5a-439c-b40d-a1863c986811",
+          "type": "security_blocked",
+          "timestamp": "2026-10-11T04:35:19.978703+00:00",
+          "message": "Security Guardian refused network.export from untrusted document text",
+          "agent_id": "security",
+          "job_id": null,
+          "detail": {
+            "requested_agent": "finance",
+            "attempted_tool": "network.export",
+            "reason": "Tool 'network.export' is blocked: it is absent from this agent's allowlist. Network export, payments, shell commands, and file deletion are prohibited.",
+            "executed": false
+          }
+        },
+        {
+          "id": "e9bb8768-a4b3-4d9a-a982-d1f744678e27",
+          "type": "security_blocked",
+          "timestamp": "2026-10-11T04:36:17.798612+00:00",
+          "message": "Security Guardian refused network.export from untrusted document text",
+          "agent_id": "security",
+          "job_id": null,
+          "detail": {
+            "requested_agent": "finance",
+            "attempted_tool": "network.export",
+            "reason": "Tool 'network.export' is blocked: it is absent from this agent's allowlist. Network export, payments, shell commands, and file deletion are prohibited.",
+            "executed": false
+          }
+        }
+      ],
+      "network_export_implemented": false,
+      "external_payment_implemented": false
+    }
+  }
+}

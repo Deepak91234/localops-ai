@@ -15,7 +15,7 @@ esac
 if [[ -f .env ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%$'\r'}"
-    if [[ "$line" =~ ^[[:space:]]*(LLM_BASE_URL|MODEL_NAME|LLM_API_KEY|LLM_TIMEOUT_SECONDS|LLM_MAX_TOKENS|LOCALOPS_DB_PATH)[[:space:]]*=(.*)$ ]]; then
+    if [[ "$line" =~ ^[[:space:]]*(LLM_BASE_URL|MODEL_NAME|LLM_API_KEY|LLM_TIMEOUT_SECONDS|LLM_MAX_TOKENS|LOCALOPS_DB_PATH|LOCALOPS_HOURLY_RATE_USD)[[:space:]]*=(.*)$ ]]; then
       key="${BASH_REMATCH[1]}"
       value="${BASH_REMATCH[2]}"
       value="${value#"${value%%[![:space:]]*}"}"

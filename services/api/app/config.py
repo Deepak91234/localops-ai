@@ -15,3 +15,4 @@ class Settings:
     llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
     llm_timeout: float = field(default_factory=lambda: float(os.getenv("LLM_TIMEOUT_SECONDS", "180")))
     max_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_TOKENS", "900")))
+    hourly_rate_usd: str | None = field(default_factory=lambda: os.getenv("LOCALOPS_HOURLY_RATE_USD") or None)

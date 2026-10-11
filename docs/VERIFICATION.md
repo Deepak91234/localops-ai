@@ -4,7 +4,7 @@ Observed on the actual ASUS GX10 on October 10, 2026 (America/Los_Angeles). All 
 
 ## Automated checks
 
-- 31 backend tests passed in 1.15 seconds. One upstream Starlette TestClient deprecation warning; no failures.
+- 38 backend tests passed after agent insights, controls, and Support retrieval were added. One upstream Starlette TestClient deprecation warning; no failures.
 - Strict TypeScript check and Vite production build passed.
 - `scripts/bootstrap.sh` completed using the Python/npm locks; `scripts/start.sh` launched the production SPA/API at loopback port 8000.
 - Prewarm redirects are refused; a local synthetic HTTP 302 test confirmed no external request. Environment files are parsed as literal configuration.
@@ -54,3 +54,20 @@ The browser remained loaded after its terminal-owned backend process had stopped
 Observed crash recovery took **2.43 seconds** while no jobs were active. A controlled stop/start verified the UI shows Local service offline, disables new submissions, and clears its connection error after recovery. New agent creation and a real local Nemotron task passed after reconnecting. The new task answered the remote-work policy with a handbook page 2 citation in **1,378.6 ms**. Network failures never automatically retry a POST; validation errors retain their details. Strict TypeScript/production build and six mocked fetch behavior cases passed.
 
 [Recovery evidence](evidence/connection-recovery.json) · [Successful new task](evidence/connection-fixed.jpg) · [Observed offline state](evidence/service-offline.jpg).
+
+
+## Individual agent workspaces (October 10 UX update)
+
+- Production browser creation of Support agent **Avery** grew the actual room from **11 to 12 separate character bodies**. Every character tag maps to the exact stored agent ID, including duplicate roles. Selecting Avery opened its own internal app tab and full page with Overview, Tasks, Test agent, Resources, Costs, and Suggestions.
+- Avery's first real Support job completed with `nemotron3:33b`: **4,747.58 ms inference**, **1,001 reported tokens**, **27.12 ms queue wait**. Its own history contains that one job; older Support agents retain their separate histories. Source snippets and page references from the fictional four-page customer playbook were visible in the browser. The output is a draft for human review; retrieved references are identified separately when appended by the backend.
+- The local playbook covers account access, billing, onboarding, escalation, and missing-policy behavior. Independent real-model tests checked account access and a missing refund/restoration guarantee; no guarantee was invented. [Support retrieval proof](evidence/support-rag-proof.json).
+- Pause and resume were exercised through Avery's UI. A new API submission while paused returned **HTTP409**. Resume retained the completed task and its evidence. Backend tests also cover durable pause state and running/queued handling; pausing does not cancel inference or unload shared weights.
+- Finance and Optimizer display the same exact invoice evidence: raw unpaid **$6,200.50**, unpaid with first record per ID **$5,000.50**, raw overdue **$4,950.50**, deduplicated overdue **$3,750.50**, duplicate **INV-1001** at CSV rows **2 and 4**. The two pages link to one another. These are fictional business invoice balances, separate from agent compute estimates.
+- Optimizer shows each actual agent's workload, token/latency measurements, specific recommendation, supporting evidence, and manual intake controls. No agent is automatically paused. Security shows enforced feature descriptions and actual prior blocked events; its new controlled browser test again returned `executed:false`, `network_request_made:false`, and `files_modified:false`.
+- Costs honestly show no configured rate. Entering a manual **$1/hour** scenario for Avery showed **$0.0013** from its measured **4.77428 seconds** of processing. This is not an actual bill, electricity reading, or payment transaction.
+- Strict TypeScript and the Vite production build pass. The **38 backend tests** include exact cost parsing, correct Optimizer navigation targets, source retrieval, ID-scoped insights, and pause/resume behavior.
+
+[Saved API evidence](evidence/agent-workspace-proof.json) · [Individual characters](evidence/individual-agents.jpg) · [Mobile agent page](evidence/mobile-agent-page.jpg) · [Security page](evidence/security-agent-page.jpg).
+
+
+Final layout recheck: desktop and 390px views showed 12 separate agents and a searchable 12-card directory. Mobile document width stayed exactly 390px with no document overflow; viewport override was reset afterward. Global motion control disabled portrait animation as expected. Switching agent pages and 3D/list views preserved the room with no browser error/warning logs. Optimizer's own table also paused and resumed Avery successfully; its compact layout keeps each measured reason beside the control. The new measured UI comparison observed an urgent wait difference of **141.42 ms (50.84%)** for the same synthetic timed jobs, without changing the existing priority policy.

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-10",
+  "desktop": {
+    "viewport": 1196,
+    "document_width": 1196,
+    "distinct_character_controls": 12,
+    "distinct_agent_ids": 12,
+    "selection_opens_exact_agent": true
+  },
+  "mobile": {
+    "viewport": 390,
+    "document_width": 390,
+    "directory_cards": 12,
+    "agent_page_reviewed": true,
+    "global_motion_control_honored": true,
+    "viewport_restored": true
+  },
+  "transitions": [
+    "3D workspace to agent page",
+    "Agent tab to living workspace",
+    "3D to list",
+    "List to 3D",
+    "Finance to Optimizer",
+    "Paused agent to resumed agent"
+  ],
+  "console_errors": [],
+  "console_warnings": [],
+  "new_support": {
+    "name": "Avery",
+    "id": "support-c6e1cbb0",
+    "browser_created": true,
+    "completed_job_count": 1
+  }
+}

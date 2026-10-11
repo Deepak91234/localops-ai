@@ -1,6 +1,6 @@
-export type Agent = {id:string;name:string;role:string;purpose:string;tools:string[];source:string;status:string};
+export type Agent = {id:string;name:string;role:string;purpose:string;tools:string[];source:string;status:string;enabled?:boolean};
 export type Job = {id:string;agent_id:string;type:string;prompt:string;priority:string;status:string;created_at:string;started_at:string|null;completed_at:string|null;result:any;error:string|null;metrics:{queue_wait_ms?:number;processing_ms?:number;inference_latency_ms?:number;tokens?:number}};
-export type Activity = {id?:string;timestamp?:string;created_at?:string;type?:string;message:string;agent_id?:string;level?:string};
+export type Activity = {id?:string;timestamp?:string;created_at?:string;type?:string;message:string;agent_id?:string;job_id?:string;detail?:any;level?:string};
 export class ApiConnectionError extends Error {
  constructor(submission=false){
   super('Cannot reach the LocalOps service. Restart LocalOps AI, then reconnect.'+(submission?' The action may already have been accepted. Check task history or the agent list before trying again; it was not automatically retried.':''));

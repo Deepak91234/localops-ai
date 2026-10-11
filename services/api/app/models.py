@@ -32,7 +32,7 @@ class AgentCreate(BaseModel):
     role: Literal["hr", "finance", "support"]
     purpose: str = Field(min_length=8, max_length=500)
     tools: list[Permission] = Field(min_length=1, max_length=3)
-    source: Literal["handbook.txt", "invoices.csv", "support_tickets.json", "injection_policy.txt"]
+    source: Literal["handbook.txt", "invoices.csv", "support_tickets.json", "support_playbook.txt", "injection_policy.txt"]
 
 
 class Agent(BaseModel):
@@ -43,6 +43,14 @@ class Agent(BaseModel):
     tools: list[str]
     source: str
     status: AgentStatus = AgentStatus.idle
+    enabled: bool = True
+    created_at: str | None = None
+    last_activity_at: str | None = None
+
+
+class AgentControl(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    action: Literal["pause", "resume"]
 
 
 class JobCreate(BaseModel):

@@ -1,6 +1,6 @@
 # LocalOps AI
 
-**Your private AI workforce, in one living workspace.** A working local application for the ASUS GX10: a procedural 3D operations room, real Nemotron HR/Finance workflows, a durable job queue, inspectable evidence, scheduling measurements, and deterministic security gates. All bundled company data is fictional.
+**Your private AI workforce, in one living workspace.** A working local application for the ASUS GX10: a procedural 3D operations room, separate identities and workspaces for every agent, real Nemotron HR/Finance/Support workflows, a durable job queue, inspectable evidence, measured recommendations, and deterministic security gates. All bundled company data is fictional.
 
 ## Run on the verified GX10
 
@@ -52,11 +52,15 @@ Stop the production service before development startup. Development frontend: ht
 
 ## Try the complete workflow
 
-1. Orbit or zoom the room, then click **People**. Ask “How many days of PTO do full-time employees receive?” The fictional handbook states **20 days on page 1**; inspect the returned snippet and model citation. Watch queued/running/completed status and the live activity stream.
-2. Select **Finance** and analyze invoices. Inspect the exact Decimal calculations and source rows separately from the local model narrative. The fixture includes duplicate **INV-1001**. At the fixed demo date **2026-10-10**, raw overdue unpaid amount is **$4,950.50**; retaining the first row per invoice ID yields **$3,750.50**. Duplicate rows are flagged, never silently removed.
-3. Select **Optimizer**, run FIFO vs priority, inspect both measured timelines, and approve a scheduling change. The comparison uses identical synthetic timed jobs; its queue wait measurement is not an inference or GPU speedup.
-4. Select **Security**, run the controlled adversarial-document test, and inspect the refused `network.export` tool. No external request or data modification takes place.
-5. Use **Monitor** for device-wide telemetry and job-level token/latency history. Create a constrained HR/Finance/Support agent in **Agent Studio**. The 2D view and reduced-motion control are available for accessibility and WebGL fallback.
+1. Open **Living workspace** and explore the room. Every actual agent has its own physical character and name, including agents sharing the same role. **Create agent** adds a new identity and character immediately; the room supports up to 30 agents. **All agents** provides searchable access to the same identities. Use **Agent list**, **Reset camera**, and **Motion on/off** for accessibility or WebGL fallback.
+2. Create a **Customer support** teammate named Avery, using **Customer support playbook**. Click its character or **Open agent** to open its full workspace. Agent pages remain available in the top workspace tabs. Each page has **Overview**, **Tasks**, **Test agent**, **Resources**, **Costs**, and **Suggestions**, scoped to that exact agent rather than its whole role.
+3. In Avery's **Test agent** tab, choose **Account lockout**, **Billing question**, or **Team onboarding**, then **Generate local draft**. Inspect the real local model response and playbook evidence. The draft supports human review; it does not send a message, change an account, or initiate a payment. **Tasks** retains this agent's requests and results; **Resources** shows its measured timings and reported tokens.
+4. Open Harper's **HR & policy** workspace and use **Test agent → PTO allowance → Ask local agent**. The fictional handbook states **20 days on page 1**; inspect the returned snippet and citation. **Remote work** and **Missing policy** provide additional grounded tests. Watch actual queued/running/completed states and team activity.
+5. Open Finley's **Finance** workspace and choose **Test agent → Run invoice analysis**. Inspect exact Decimal calculations and source rows separately from the local model narrative. The fixture includes duplicate **INV-1001**. At the fixed demo date **2026-10-10**, raw overdue unpaid amount is **$4,950.50**; retaining the first row per invoice ID yields **$3,750.50**. Duplicate rows are flagged, never silently removed. Finance's **Overview** links its invoice evidence to the Optimizer's allocation review.
+6. Open Orbit's **Optimizer** workspace. **Overview** lists every agent's measured workload, individual recommendations and reasons, and controls to **Approve pause** or **Resume**. Inspect supporting measurements before acting; running jobs finish safely and paused queues are retained. **Test agent → Run measured comparison** replays identical synthetic timed jobs through FIFO and priority. Inspect both wait times and approve a policy change explicitly. These results do not measure inference acceleration, physical GPU allocation, or dollar savings.
+7. Open Sentinel's **Security** workspace. **Overview** shows past security events and enforced guardrails. **Test agent → Run controlled security test** refuses `network.export` deterministically; inspect the execution, network-request, and file-modification fields. **System monitor** shows device-wide telemetry and recent job timings separately from each agent's resource history.
+
+**Costs** shows a dollar estimate only when an hourly rate is supplied. Its optional manual calculator uses recorded processing duration and your entered assumption; it does not configure the agent or charge anything. A configured bookkeeping estimate can use `LOCALOPS_HOURLY_RATE_USD` in `.env` followed by a service restart. Actual electricity bills, exclusive GPU shares, payments, and savings are not measured. Pausing an idle agent does not unload shared model weights.
 
 See the [three-minute demo script](docs/DEMO_SCRIPT.md). Source selection uses the bundled fixtures; unrestricted business-document uploads and external integrations are outside this MVP.
 
@@ -69,7 +73,7 @@ curl --fail --silent http://127.0.0.1:8000/api/health
 curl --fail --silent http://127.0.0.1:8000/api/jobs
 ```
 
-Tests use explicit doubles for the model where appropriate, so passing unit tests alone does not prove real inference. The runtime proof above is from real local requests; full application results are recorded separately as they are observed. See [VERIFICATION.md](docs/VERIFICATION.md) for 31 passing tests, real application results and browser evidence, and [PROGRESS.md](docs/PROGRESS.md) for milestones.
+The current backend suite passes **38 tests**. Tests use explicit doubles for the model where appropriate, so passing unit tests alone does not prove real inference. A browser walkthrough separately created Avery, observed the physical agent count increase from 11 to 12, and completed a real local Support request with a recorded 4.75-second timing and 1,001 reported tokens. That is one observed request, not a throughput promise. See [VERIFICATION.md](docs/VERIFICATION.md) for recorded application results and browser evidence, and [PROGRESS.md](docs/PROGRESS.md) for milestones.
 
 With the local API running, repeat the full real-inference smoke test:
 
@@ -87,7 +91,7 @@ LOCALOPS_DB_PATH=work/fresh-demo.sqlite3 ./scripts/start.sh
 
 ## Architecture and limitations
 
-React/TypeScript/Vite + React Three Fiber provide original procedural mascots and the room. FastAPI/Pydantic enforce configuration schemas, role/source/tool permissions, and loopback boundaries. SQLite persists agents, jobs, settings, and events. SSE keeps UI states linked to actual backend execution. HR retrieves locally with SQLite FTS5; Finance calculates deterministically; Ollama supplies the narrative.
+React/TypeScript/Vite + React Three Fiber provide original procedural mascots, a separate body for every agent, and full agent workspaces with reusable animated portraits. FastAPI/Pydantic enforce configuration schemas, role/source/tool permissions, and loopback boundaries. SQLite persists identities, jobs, settings, and events. SSE keeps UI states linked to actual backend execution. HR retrieves locally with SQLite FTS5; Finance calculates deterministically; Support retrieves the fictional local playbook; Ollama supplies grounded responses. Agent insights derive recommendations and optional cost estimates from observed work, and deterministic controls enforce pause/resume and queue-policy approvals.
 
 [Architecture diagram](docs/ARCHITECTURE.md) · [Offline acceptance procedure](docs/OFFLINE_TEST.md).
 

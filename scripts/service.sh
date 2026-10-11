@@ -79,7 +79,7 @@ start_service() {
   fi
   local -a environment=()
   local key
-  for key in LLM_BASE_URL MODEL_NAME LLM_API_KEY LLM_TIMEOUT_SECONDS LLM_MAX_TOKENS LOCALOPS_DB_PATH; do
+  for key in LLM_BASE_URL MODEL_NAME LLM_API_KEY LLM_TIMEOUT_SECONDS LLM_MAX_TOKENS LOCALOPS_DB_PATH LOCALOPS_HOURLY_RATE_USD; do
     if [[ -v "$key" ]]; then
       # Names alone let systemd-run obtain values without exposing secrets in argv.
       environment+=("--setenv=$key")

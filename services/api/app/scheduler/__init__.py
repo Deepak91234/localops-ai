@@ -6,8 +6,9 @@ from ..security import PermissionDenied
 from ..tools.workflows import run_workflow
 
 
-def select_next(jobs, policy):
-    queued = [j for j in jobs if j["status"] == "queued"]
+def select_next(jobs, policy, agents=None):
+    disabled = {agent["id"] for agent in (agents or []) if not agent.get("enabled", True)}
+    queued = [j for j in jobs if j["status"] == "queued" and j["agent_id"] not in disabled] if agents is not None else [j for j in jobs if j["status"] == "queued"]
     if policy == "priority":
         # Existing running tasks always complete; urgent jobs only reorder the pending queue.
         queued.sort(key=lambda j: (0 if j["priority"] == "urgent" else 1, j["created_at"]))
@@ -29,6 +30,10 @@ class Scheduler:
     async def start(self):
         self.store.recover_interrupted_jobs()
         for agent in self.store.all("agents"):
+            if not agent.get("enabled", True):
+                agent.update(status="paused", pause_pending=False)
+                self.store.put("agents", agent)
+                continue
             if agent["status"] == "running":
                 agent["status"] = "queued" if any(j["agent_id"] == agent["id"] and j["status"] == "queued" for j in self.store.all("jobs")) else "idle"
                 self.store.put("agents", agent)
@@ -45,17 +50,21 @@ class Scheduler:
 
     async def agent_state(self, agent_id, status):
         agent = self.store.get("agents", agent_id)
+        if not agent.get("enabled", True) and status != "running":
+            status = "paused"
+            agent["pause_pending"] = False
         # A queued submission must never hide an actively running job.
         if status == "queued" and any(j["agent_id"] == agent_id and j["status"] == "running" for j in self.store.all("jobs")):
             status = "running"
         agent["status"] = status
+        agent["last_activity_at"] = utc_now()
         self.store.put("agents", agent)
         await self.events.publish("agents_updated", self.store.all("agents"))
 
     async def _worker(self):
         while True:
             self.wake.clear()
-            job = select_next(self.store.all("jobs"), self.policy)
+            job = select_next(self.store.all("jobs"), self.policy, self.store.all("agents"))
             if job is None:
                 await self.wake.wait()
                 continue

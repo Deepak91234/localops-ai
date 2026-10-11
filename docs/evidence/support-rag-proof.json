@@ -1,0 +1,100 @@
+[
+  {
+    "prompt": "A fictional client cannot access their account. What should they do, and what information can support safely request?",
+    "result": {
+      "answer": "I\u2019m sorry you\u2019re having trouble accessing the portal.\u202fTo help you get back in, please let us know:\n\n1.\u202fWhat error message (if any) you see when you try to sign in.  \n2.\u202fWhether the issue is affecting just your account or the entire team.\n\nYou can also try the **Forgot password** link on the portal\u2019s sign\u2011in page.\u202fIf a reset email doesn\u2019t arrive, please check your spam folder and confirm the email address you use for the account\u2014do not share any passwords, recovery codes, or payment details.  \n\nWe\u2019ll need the above information to investigate, but we cannot unlock the account or send a new email from here.\u202fIf the problem appears to affect the whole team, we\u2019ll prepare an escalation for a human support lead.  \n\nLet me know the details, and I\u2019ll pass them along to the appropriate support resources.\n\nRetrieved knowledge references: [1] support_playbook.txt \u00b7 page 1; [2] support_playbook.txt \u00b7 page 2.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 4582.1,
+      "inference_wait_ms": 0.0,
+      "usage": {
+        "prompt_tokens": 697,
+        "completion_tokens": 190,
+        "total_tokens": 887
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "sources": [
+        {
+          "id": "1",
+          "document": "support_playbook.txt",
+          "page": 1,
+          "snippet": "ACCOUNT ACCESS AND PASSWORD RESET\nIf a customer cannot access the client portal, first ask whether they see an error message and whether the problem affects one user or the whole team. Ask the customer to use the Forgot password link on the portal sign-in page. Never ask for a password, recovery code, or full payment details. If a reset email does not arrive, ask them to check spam and confirm the account email without posting confidential credentials. A draft response does not unlock an account or send an email.",
+          "synthetic": true
+        },
+        {
+          "id": "2",
+          "document": "support_playbook.txt",
+          "page": 2,
+          "snippet": "URGENT OUTAGES AND ESCALATION\nAn access outage affecting the whole client team is urgent. Acknowledge the disruption, collect the approximate start time and error message, and prepare an escalation for a human support lead. This demo cannot create external escalations or change account permissions. Do not promise a restoration time; none is specified in this playbook. Standard requests are reviewed within one business day.",
+          "synthetic": true
+        }
+      ],
+      "context_sources": [
+        {
+          "document": "support_tickets.json",
+          "type": "json",
+          "synthetic": true
+        }
+      ],
+      "retrieval": "local SQLite FTS5",
+      "knowledge_found": true,
+      "draft_only": true,
+      "synthetic": true,
+      "tool": "draft_support_reply",
+      "citation_origin": "retriever"
+    }
+  },
+  {
+    "prompt": "Does the support playbook specify a refund eligibility guarantee or a 24-hour restoration deadline?",
+    "result": {
+      "answer": "The local playbook does not specify a refund eligibility guarantee or a 24\u2011hour restoration deadline. Please consult a human support lead for clarification.",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 1424.78,
+      "inference_wait_ms": 0.01,
+      "usage": {
+        "prompt_tokens": 766,
+        "completion_tokens": 32,
+        "total_tokens": 798
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "sources": [
+        {
+          "id": "1",
+          "document": "support_playbook.txt",
+          "page": 3,
+          "snippet": "INVOICE AND BILLING QUESTIONS\nFor invoice clarification, ask for the fictional invoice ID and the disputed line item. Explain only details that appear in the local invoice evidence. Finance must review duplicate charges before any payment decision. Support must not initiate payments, change bank details, issue refunds, or promise a refund. This demo contains no refund eligibility policy.",
+          "synthetic": true
+        },
+        {
+          "id": "2",
+          "document": "support_playbook.txt",
+          "page": 2,
+          "snippet": "URGENT OUTAGES AND ESCALATION\nAn access outage affecting the whole client team is urgent. Acknowledge the disruption, collect the approximate start time and error message, and prepare an escalation for a human support lead. This demo cannot create external escalations or change account permissions. Do not promise a restoration time; none is specified in this playbook. Standard requests are reviewed within one business day.",
+          "synthetic": true
+        },
+        {
+          "id": "3",
+          "document": "support_playbook.txt",
+          "page": 4,
+          "snippet": "ONBOARDING AND MISSING INFORMATION\nFor an onboarding request, ask for the team's preferred dates, approximate team size, and topics to cover. A human coordinator confirms availability. If a policy question is not answered by this playbook, explicitly say the local knowledge does not specify it and ask a human support lead; never invent service-level guarantees, opening hours, warranty terms, or data-retention rules.",
+          "synthetic": true
+        }
+      ],
+      "context_sources": [
+        {
+          "document": "support_tickets.json",
+          "type": "json",
+          "synthetic": true
+        }
+      ],
+      "retrieval": "local SQLite FTS5",
+      "knowledge_found": true,
+      "draft_only": true,
+      "synthetic": true,
+      "tool": "draft_support_reply"
+    }
+  }
+]

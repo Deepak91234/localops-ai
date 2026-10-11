@@ -83,7 +83,24 @@ async def run_workflow(agent, job, settings, llm):
         response = await finance_narrative(llm, job["prompt"], facts, system_context)
         result = {**facts, **response, "tool": tool, "narrative_label": "Local Nemotron narrative; exact calculations shown separately"}
     else:
-        tickets = json.loads(path.read_text())
-        response = await llm.chat(system_context + " Draft a helpful reply to this fictional support request. Do not claim a reply was sent, account access was changed, or a ticket resolved. Ask for any missing information.", f"Fictional reference queue: {json.dumps(tickets)}\nCustomer request: {job['prompt']}", max_tokens=500)
-        result = {**response, "sources": [{"document": path.name, "type": "json", "synthetic": True}], "draft_only": True, "synthetic": True, "tool": tool}
+        playbook = settings.data_dir / "support_playbook.txt"
+        if not playbook.is_file() or not path.is_file():
+            missing = playbook.name if not playbook.is_file() else path.name
+            raise WorkflowEvidenceError(f"Required local support source '{missing}' is missing. Restore the fictional document before drafting a grounded reply.", {"answer": "Support cannot draft a grounded answer until its local knowledge source is restored.", "sources": [], "missing_source": missing, "draft_only": True, "synthetic": True})
+        tickets_path = settings.data_dir / "support_tickets.json"
+        tickets = json.loads(tickets_path.read_text()) if tickets_path.is_file() else []
+        # Generic drafting words otherwise swamp topical terms such as account or
+        # password in a tiny playbook. They remain in the full model request.
+        retrieval_question = re.sub(r"\b(fictional|client|customer|support|information|safely|draft|helpful|reply|should|would|could|request|please)\b", " ", job["prompt"], flags=re.IGNORECASE)
+        sources = retrieve_policy(playbook, retrieval_question)
+        response = await llm.chat(system_context + " Draft a helpful reply grounded only in the supplied support playbook excerpts. Cite only supplied source IDs as [1], [2], etc. If no excerpt answers a policy question, say the local playbook does not specify it and ask a human support lead. Do not assume an access problem affects the whole team; ask when that is unknown. Do not claim a reply was sent, account access was changed, or a ticket resolved. Never request passwords or recovery codes.", f"Retrieved support knowledge: {json.dumps(sources)}\nFictional reference queue (context, not policy): {json.dumps(tickets)}\nCustomer request: {job['prompt']}", max_tokens=600)
+        cited_ids = re.findall(r"\[(\d+)\]", response["answer"])
+        if any(citation not in {s["id"] for s in sources} for citation in cited_ids):
+            raise WorkflowEvidenceError("Support model returned an unsupported citation; its draft was refused.", {"sources": sources, "draft_only": True, "synthetic": True, "answer": "The draft failed citation validation. Retrieved evidence remains available for human review."})
+        citation_origin = "model" if cited_ids else "retriever"
+        if sources and not cited_ids:
+            references = "; ".join(f"[{source['id']}] {source['document']} · page {source['page']}" for source in sources)
+            response["answer"] += "\n\nRetrieved knowledge references: " + references + "."
+        result = {**response, "sources": sources, "context_sources": [{"document": tickets_path.name, "type": "json", "synthetic": True}] if tickets else [], "retrieval": "local SQLite FTS5", "knowledge_found": bool(sources), "draft_only": True, "synthetic": True, "tool": tool}
+        result["citation_origin"] = citation_origin
     return result

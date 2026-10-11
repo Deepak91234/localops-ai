@@ -18,7 +18,12 @@ class Store:
         self.connection.commit()
         for agent in DEFAULT_AGENTS:
             if self.get("agents", agent["id"]) is None:
-                self.put("agents", agent)
+                self.put("agents", {**agent, "enabled": True, "created_at": utc_now(), "last_activity_at": None})
+        # Backfill control fields only. Existing sources, job records, and history
+        # remain intact; an unknown legacy creation date is never invented.
+        for agent in self.all("agents"):
+            if "enabled" not in agent:
+                self.put("agents", {**agent, "enabled": True, "created_at": agent.get("created_at"), "last_activity_at": agent.get("last_activity_at")})
         if self.get("settings", "scheduler") is None:
             self.put("settings", {"id": "scheduler", "policy": "fifo"})
 

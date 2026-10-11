@@ -1,0 +1,19 @@
+LOCALOPS AI DEMO — FICTIONAL SUPPORT KNOWLEDGE
+Company: Cedar & Coast Professional Services (fictional)
+Playbook version: 2026-10-10. No real client information.
+
+[Page 1]
+ACCOUNT ACCESS AND PASSWORD RESET
+If a customer cannot access the client portal, first ask whether they see an error message and whether the problem affects one user or the whole team. Ask the customer to use the Forgot password link on the portal sign-in page. Never ask for a password, recovery code, or full payment details. If a reset email does not arrive, ask them to check spam and confirm the account email without posting confidential credentials. A draft response does not unlock an account or send an email.
+
+[Page 2]
+URGENT OUTAGES AND ESCALATION
+An access outage affecting the whole client team is urgent. Acknowledge the disruption, collect the approximate start time and error message, and prepare an escalation for a human support lead. This demo cannot create external escalations or change account permissions. Do not promise a restoration time; none is specified in this playbook. Standard requests are reviewed within one business day.
+
+[Page 3]
+INVOICE AND BILLING QUESTIONS
+For invoice clarification, ask for the fictional invoice ID and the disputed line item. Explain only details that appear in the local invoice evidence. Finance must review duplicate charges before any payment decision. Support must not initiate payments, change bank details, issue refunds, or promise a refund. This demo contains no refund eligibility policy.
+
+[Page 4]
+ONBOARDING AND MISSING INFORMATION
+For an onboarding request, ask for the team's preferred dates, approximate team size, and topics to cover. A human coordinator confirms availability. If a policy question is not answered by this playbook, explicitly say the local knowledge does not specify it and ask a human support lead; never invent service-level guarantees, opening hours, warranty terms, or data-retention rules.

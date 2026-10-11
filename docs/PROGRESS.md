@@ -11,3 +11,8 @@ Verified October 10, 2026, America/Los_Angeles.
 | 4 — demo/delivery | One-command startup after bootstrap, lockfiles, three-minute script, proof/screenshots, architecture and offline procedure. | Bootstrap completed; production startup passed; repeated live smoke passed; inference evidence saved. | WAN-disconnected acceptance remains unobserved and requires the user-run procedure. |
 
 See [VERIFICATION.md](VERIFICATION.md), [LOCAL_INFERENCE_PROOF.md](LOCAL_INFERENCE_PROOF.md) and raw JSON/screenshot evidence. Tests used only fictional company data. No model downloads, driver changes, LAN exposure or public publishing occurred.
+
+
+## October 10: user-friendly individual agents
+
+Completed separate visible characters for every stored agent, full internal agent tabs, a searchable team directory, a Support playbook with local retrieval and real tests, ID-scoped history and job resources, transparent cost scenarios, evidence-based Optimizer suggestions and durable pause/resume controls, Finance evidence links, and Security event/feature pages. Creation and real Support inference passed on the GX10. All 38 backend tests and the production frontend build pass. Existing agents and job history were retained. See VERIFICATION.md for exact observations and limits.

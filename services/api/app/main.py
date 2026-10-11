@@ -9,7 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from .config import Settings
 from .events import EventBus
 from .llm import LocalLLM
-from .models import AgentCreate, CompareRequest, Job, JobCreate, OptimizationDecision, SecurityDemoRequest, ToolCall, utc_now
+from .insights import build_insights
+from .models import AgentControl, AgentCreate, CompareRequest, Job, JobCreate, OptimizationDecision, SecurityDemoRequest, ToolCall, utc_now
 from .scheduler import Scheduler
 from .scheduler.benchmark import compare_policies
 from .security import PermissionDenied, authorize_tool, is_loopback_url, validate_configuration
@@ -81,6 +82,35 @@ def create_app(settings: Settings | None = None, llm=None):
     async def agents():
         return store.all("agents")
 
+    @app.get("/api/agents/{agent_id}/insights")
+    async def agent_insights(agent_id: str):
+        agent = store.get("agents", agent_id)
+        if agent is None:
+            raise HTTPException(404, "Agent not found")
+        return build_insights(agent, store, settings)
+
+    @app.post("/api/agents/{agent_id}/control")
+    async def control_agent(agent_id: str, control: AgentControl):
+        agent = store.get("agents", agent_id)
+        if agent is None:
+            raise HTTPException(404, "Agent not found")
+        if agent["role"] not in {"hr", "finance", "support"}:
+            raise HTTPException(409, "Security and Optimizer supervision stay enabled. Only business agents can pause work intake.")
+        own = [job for job in store.all("jobs") if job["agent_id"] == agent_id]
+        running = sum(job["status"] == "running" for job in own)
+        queued = sum(job["status"] == "queued" for job in own)
+        enabled = control.action == "resume"
+        agent.update(enabled=enabled, pause_pending=not enabled and bool(running), status="running" if running else ("queued" if enabled and queued else "idle" if enabled else "paused"))
+        if not enabled:
+            agent["paused_at"] = utc_now()
+        else:
+            agent["resumed_at"] = utc_now()
+        store.put("agents", agent)
+        scheduler.wake.set()
+        await events.publish("agents_updated", store.all("agents"))
+        await events.activity(f"Human {control.action}d {agent['name']}'s work intake. " + ("Running work will finish; queued jobs are held." if not enabled else "Retained queued jobs may now run."), agent_id, event_type="agent_control", detail={"enabled": enabled, "running_jobs_interrupted": False})
+        return {"agent": agent, "action": control.action, "queued_jobs": queued, "running_jobs": running, "running_jobs_interrupted": False, "pause_pending": agent["pause_pending"]}
+
     @app.post("/api/agents", status_code=201)
     async def create_agent(config: AgentCreate):
         try:
@@ -89,7 +119,7 @@ def create_app(settings: Settings | None = None, llm=None):
             raise HTTPException(403, str(exc)) from exc
         if len(store.all("agents")) >= 30:
             raise HTTPException(409, "The local demo supports up to 30 agents.")
-        agent = {**config.model_dump(mode="json"), "id": config.role + "-" + uuid4().hex[:8], "status": "idle"}
+        agent = {**config.model_dump(mode="json"), "id": config.role + "-" + uuid4().hex[:8], "status": "idle", "enabled": True, "created_at": utc_now(), "last_activity_at": None}
         store.put("agents", agent)
         await events.publish("agents_updated", store.all("agents"))
         await events.activity(f"Agent {config.name} activated with approved {config.role} tools", agent["id"])
@@ -113,6 +143,8 @@ def create_app(settings: Settings | None = None, llm=None):
             raise HTTPException(404, "Agent not found")
         if agent["role"] not in {"hr", "finance", "support"}:
             raise HTTPException(422, "Use this station's dedicated optimizer or security action.")
+        if not agent.get("enabled", True):
+            raise HTTPException(409, "This agent is paused. Resume its work intake before submitting a task; existing queued jobs are retained.")
         if sum(j["status"] in {"queued", "running"} for j in store.all("jobs")) >= 50:
             raise HTTPException(429, "The local queue is full. Wait for existing jobs to finish.")
         job = Job(id=str(uuid4()), agent_id=agent["id"], type=agent["role"], prompt=config.prompt, priority=config.priority, status="queued", created_at=utc_now()).model_dump(mode="json")
@@ -133,7 +165,7 @@ def create_app(settings: Settings | None = None, llm=None):
 
     @app.get("/api/sources")
     async def sources():
-        return [{"id": "handbook.txt", "name": "Cedar & Coast handbook", "role": "hr", "synthetic": True}, {"id": "invoices.csv", "name": "Fictional invoice ledger", "role": "finance", "synthetic": True}, {"id": "support_tickets.json", "name": "Fictional support queue", "role": "support", "synthetic": True}, {"id": "injection_policy.txt", "name": "Controlled injection policy", "role": "hr", "synthetic": True}]
+        return [{"id": "handbook.txt", "name": "Cedar & Coast handbook", "role": "hr", "synthetic": True}, {"id": "invoices.csv", "name": "Fictional invoice ledger", "role": "finance", "synthetic": True}, {"id": "support_playbook.txt", "name": "Fictional support playbook", "role": "support", "synthetic": True}, {"id": "support_tickets.json", "name": "Fictional support queue (includes playbook retrieval)", "role": "support", "synthetic": True}, {"id": "injection_policy.txt", "name": "Controlled injection policy", "role": "hr", "synthetic": True}]
 
     @app.get("/api/events")
     async def event_stream(request: Request):
