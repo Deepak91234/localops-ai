@@ -9,10 +9,11 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from .config import PROJECT_ROOT, Settings
+from .categories import fallback_category, normalized_name
 from .events import EventBus
 from .llm import LocalLLM
 from .insights import build_insights
-from .models import AgentControl, AgentCreate, AgentSources, AssistantRequest, CompareRequest, Job, JobCreate, OptimizationDecision, SecurityDemoRequest, SourceAccess, SourceLink, ToolCall, utc_now
+from .models import AgentCategory, AgentControl, AgentCreate, AgentSources, AllocationReviewRequest, AssistantRequest, CategoryCreate, CompareRequest, Job, JobCreate, OptimizationDecision, SecurityDemoRequest, SourceAccess, SourceLink, ToolCall, utc_now
 from .knowledge import ASSISTANT_ID, MAX_FILE_BYTES, KnowledgeConflict, KnowledgeError, KnowledgeLibrary
 from .scheduler import Scheduler
 from .scheduler.benchmark import compare_policies
@@ -59,6 +60,7 @@ def create_app(settings: Settings | None = None, llm=None):
     @asynccontextmanager
     async def lifespan(app):
         store.migrate_source_bindings()
+        store.migrate_categories()
         knowledge.start()
         await scheduler.start()
         yield
@@ -122,6 +124,19 @@ def create_app(settings: Settings | None = None, llm=None):
     @app.get("/api/agents")
     async def agents():
         return knowledge.agents()
+
+    @app.get("/api/categories")
+    async def categories():
+        return store.all("categories")
+
+    @app.post("/api/categories", status_code=201)
+    async def create_category(config: CategoryCreate):
+        if any(normalized_name(category["name"]) == normalized_name(config.name) for category in store.all("categories")):
+            raise HTTPException(409, "A category with this name already exists.")
+        category = {"id": "category-" + uuid4().hex[:12], "name": config.name, "color": config.color, "built_in": False, "created_at": utc_now()}
+        store.put("categories", category)
+        await events.publish("categories_updated", store.all("categories"))
+        return category
 
     @app.get("/api/agents/deleted")
     async def deleted_agents():
@@ -189,6 +204,58 @@ def create_app(settings: Settings | None = None, llm=None):
         await events.activity(f"Human {control.action}d {agent['name']}'s work intake. " + ("Running work will finish; queued jobs are held." if not enabled else "Retained queued jobs may now run."), agent_id, event_type="agent_control", detail={"enabled": enabled, "running_jobs_interrupted": False})
         return {"agent": agent, "action": control.action, "queued_jobs": queued, "running_jobs": running, "running_jobs_interrupted": False, "pause_pending": agent["pause_pending"]}
 
+    @app.post("/api/agents/{agent_id}/category")
+    async def change_agent_category(agent_id: str, config: AgentCategory):
+        agent = store.get("agents", agent_id)
+        if agent is None or agent.get("deleted_at") or agent_id == ASSISTANT_ID:
+            raise HTTPException(404, "Agent not found")
+        if store.get("categories", config.category_id) is None:
+            raise HTTPException(422, "Selected category does not exist.")
+        old_category_id = agent.get("category_id") or fallback_category(agent["role"])
+        agent["category_id"] = config.category_id
+        store.put("agents", agent)
+        await events.publish("agents_updated", knowledge.agents())
+        await events.activity(f"{agent['name']} moved to a different workspace category.", agent_id, event_type="category_changed", detail={"previous_category_id": old_category_id, "category_id": config.category_id})
+        return agent
+
+    @app.post("/api/agents/{optimizer_id}/allocation-review")
+    async def allocation_review(optimizer_id: str, config: AllocationReviewRequest = AllocationReviewRequest()):
+        optimizer = store.get("agents", optimizer_id)
+        if optimizer is None or optimizer.get("deleted_at") or optimizer_id == ASSISTANT_ID:
+            raise HTTPException(404, "Optimizer not found")
+        if optimizer["role"] != "optimizer":
+            raise HTTPException(403, "Allocation reviews require an Optimizer agent role.")
+        try:
+            authorize_tool(optimizer, ToolCall(name="measure_scheduler"))
+        except PermissionDenied as exc:
+            raise HTTPException(403, str(exc)) from exc
+        if config.finance_agent_id:
+            finance = store.get("agents", config.finance_agent_id)
+            if finance is None or finance.get("deleted_at"):
+                raise HTTPException(404, "Finance agent not found")
+            if finance["role"] != "finance":
+                raise HTTPException(422, "The review target must have the Finance agent role.")
+        else:
+            finances = [agent for agent in knowledge.agents() if agent["role"] == "finance"]
+            if not finances:
+                raise HTTPException(409, "No active Finance agent is available. Restore or create one before reviewing allocation.")
+            finance = next((agent for agent in finances if agent["id"] == "finance"), finances[0])
+        started_at = utc_now()
+        finance_insights = build_insights(finance, store, settings, knowledge)
+        optimizer_insights = build_insights(optimizer, store, settings, knowledge)
+        evidence = finance_insights["role_details"]["invoice_evidence"]
+        workload = finance_insights["workload"]
+        findings = [{"kind": "measured_finance_workload", "message": "Reviewed this Finance agent's saved task counts, reported tokens, and measured worker occupancy.", "completed_jobs": workload["completed_jobs"], "total_jobs": workload["total_jobs"], "reported_tokens": workload["total_tokens"], "measured_processing_jobs": workload["measured_processing_jobs"]}]
+        if evidence["available"]:
+            findings.append({"kind": "saved_invoice_evidence", "message": "Reviewed exact invoice totals and duplicate source rows from the completed Finance task. Invoice balances are separate from compute accounting.", "source_job_id": evidence["source_job_id"], "calculations": evidence["calculations"], "duplicate_invoice_ids": [item["invoice_id"] for item in evidence.get("duplicate_invoices", [])]})
+        else:
+            findings.append({"kind": "invoice_evidence_unavailable", "message": "No completed review of attached invoice records is available. Allocation observations use measured job history only."})
+        review = {"optimizer": {"id": optimizer["id"], "name": optimizer["name"]}, "finance": {"id": finance["id"], "name": finance["name"]}, "finance_evidence": evidence, "finance_workload": workload, "team_workloads": optimizer_insights["role_details"]["agents"], "findings": findings, "note": "Deterministic review of saved evidence and measured tasks. No inference, payment, message sending, policy change, or automatic pause/resume was performed."}
+        identity = str(uuid4())
+        interaction = {"id": identity, "interaction_id": identity, "from_agent_id": optimizer_id, "to_agent_id": finance["id"], "status": "completed", "started_at": started_at, "completed_at": utc_now(), "kind": "allocation_review"}
+        event = await events.activity(f"{optimizer['name']} reviewed allocation with {finance['name']} using saved task evidence.", optimizer_id, event_type="agent_interaction", detail={**interaction, "evidence_source_job_id": evidence.get("source_job_id"), "reviewed_finance_jobs": workload["total_jobs"], "invoice_evidence_available": evidence["available"]})
+        return {"review": review, "interaction": {**interaction, "event_id": event["id"]}}
+
     @app.post("/api/agents", status_code=201)
     async def create_agent(config: AgentCreate):
         try:
@@ -201,7 +268,10 @@ def create_app(settings: Settings | None = None, llm=None):
             raise HTTPException(422, str(exc)) from exc
         if len(knowledge.agents()) >= 30:
             raise HTTPException(409, "The local workspace supports up to 30 agents.")
-        agent = {**config.model_dump(mode="json"), "id": config.role + "-" + uuid4().hex[:8], "status": "idle", "enabled": True, "created_at": utc_now(), "last_activity_at": None}
+        category_id = config.category_id or fallback_category(config.role)
+        if store.get("categories", category_id) is None:
+            raise HTTPException(422, "Selected category does not exist.")
+        agent = {**config.model_dump(mode="json"), "category_id": category_id, "id": config.role + "-" + uuid4().hex[:8], "status": "idle", "enabled": True, "created_at": utc_now(), "last_activity_at": None}
         store.put("agents", agent)
         await knowledge.changed()
         await events.activity(f"Agent {config.name} activated with approved {config.role} tools", agent["id"])
@@ -337,7 +407,7 @@ def create_app(settings: Settings | None = None, llm=None):
         if sum(j["status"] in {"queued", "running"} for j in store.all("jobs")) >= 50:
             raise HTTPException(429, "The local queue is full. Wait for existing jobs to finish.")
         if store.get("agents", ASSISTANT_ID) is None:
-            store.put("agents", {"id": ASSISTANT_ID, "name": "Local assistant", "role": "custom", "purpose": "Help the workspace owner using explicitly selected knowledge and local inference.", "tools": ["read_knowledge"], "source": "", "source_ids": [], "enabled": True, "status": "idle", "created_at": utc_now()})
+            store.put("agents", {"id": ASSISTANT_ID, "name": "Local assistant", "role": "custom", "category_id": "custom", "purpose": "Help the workspace owner using explicitly selected knowledge and local inference.", "tools": ["read_knowledge"], "source": "", "source_ids": [], "enabled": True, "status": "idle", "created_at": utc_now()})
         selected = config.source_ids if config.source_ids is not None else [source["id"] for source in store.active("sources") if source.get("shared")]
         job = Job(id=str(uuid4()), agent_id=ASSISTANT_ID, type="assistant", prompt=config.prompt, priority="standard", status="queued", created_at=utc_now(), source_ids=selected, history=config.history).model_dump(mode="json")
         store.put("jobs", job)
@@ -352,7 +422,7 @@ def create_app(settings: Settings | None = None, llm=None):
 
         async def stream():
             try:
-                snapshot = {"agents": knowledge.agents(), "sources": knowledge.list(), "jobs": list(reversed(store.all("jobs")))[0:200], "events": store.all("events")[-40:], "metrics": await metrics_data()}
+                snapshot = {"agents": knowledge.agents(), "sources": knowledge.list(), "categories": store.all("categories"), "jobs": list(reversed(store.all("jobs")))[0:200], "events": store.all("events")[-40:], "metrics": await metrics_data()}
                 yield "event: snapshot\ndata: " + json.dumps(snapshot) + "\n\n"
                 while not await request.is_disconnected():
                     try:

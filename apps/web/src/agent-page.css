@@ -26,6 +26,8 @@
 @media(max-width:500px){.ap-test-panel{scroll-margin-top:56px}.ap-test-source{flex-wrap:wrap}.ap-test-source .ap-knowledge-link{margin-left:0;font-size:9px}.ap-knowledge-section{gap:16px}}
 
 /* Destructive actions remain visible, named, and usable on small screens. */
+.ap-category-select{display:flex;align-items:center;gap:9px;margin-top:15px;font-size:10px;color:#8cabbd}.ap-category-select select,.ap-finance-review-actions select{border:1px solid #395764;border-radius:7px;background:#142932;color:#c1dce2;padding:8px 10px;font-size:11px;max-width:240px;min-width:0}.ap-finance-review-actions{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}.ap-finance-review-actions label{display:flex;flex-direction:column;gap:8px;color:#95b6c4;font-size:11px;min-width:0}.ap-finance-review-actions .button{font-size:11px;min-height:38px}.ap-review-findings p{font-size:11px;line-height:1.8;color:#b5d2d6;padding:10px;border-left:2px solid #79a99b;background:#17362e55;border-radius:0 7px 7px 0}.ap-review-findings{margin:15px 0}
+@media(max-width:800px){.ap-category-select{flex-wrap:wrap}.ap-category-select select{max-width:100%;min-height:42px}.ap-finance-review-actions{align-items:stretch;flex-direction:column}.ap-finance-review-actions select{max-width:100%;min-height:42px}.ap-finance-review-actions .button{min-height:44px}}
 .ap-hero-actions .ap-delete-agent{color:#edb5ab;border:1px solid #78554e;background:#38292b;min-height:38px}
 .ap-hero-actions .ap-delete-agent:hover:not(:disabled){color:#ffe0da;border-color:#a57468;background:#4a3032}
 .ap-hero-actions .ap-delete-agent:focus-visible{outline:2px solid #e3a99b;outline-offset:3px}

@@ -4,11 +4,35 @@ Current upgrade observed on the actual ASUS GX10 on October 11, 2026, America/Lo
 
 ## Automated checks and runtime
 
-- Latest full backend suite: **107 passed in 10.95 seconds**, including nine deletion/recovery tests. One third-party Starlette deprecation warning remains.
-- Strict TypeScript and the production Vite build passed after the latest knowledge/cache UI changes. Automated model tests use doubles where appropriate; real inference is recorded separately below.
+- Latest full backend suite: **118 passed in 11.89 seconds**, including nine deletion/recovery tests and eleven category/allocation-review checks. One third-party Starlette deprecation warning remains.
+- Strict TypeScript and the current production Vite build passed. Desktop and 390px browser QA passed for custom categories, exact agent identities, workload animation, recorded reviews, deletion/recovery, and the compact assistant. Automated model tests use doubles where appropriate; real inference is recorded separately below.
 - Existing GX10/GB10, Ollama 0.23.2, and cached `nemotron3:33b` are used. Hardware and initial cold/warm inference evidence remain in [ACCESS_REPORT.md](ACCESS_REPORT.md) and [LOCAL_INFERENCE_PROOF.md](LOCAL_INFERENCE_PROOF.md).
-- Production service restart passed: health returned `synthetic_data:false`, local Nemotron available, and **16 visible agents, three sources, and three completed real jobs** persisted at the observed checkpoint.
-- The rewritten `scripts/smoke.py` checks health, API contracts, initial SSE snapshot, and served production assets using GET requests only. It does not submit inference or mutate user/application records. Its latest checkpoint observes **16 visible agents, six sources, and eight completed jobs**, and verified the production HTML and all three JS/CSS assets match the disk build. Its result is recorded in [read-only smoke evidence](evidence/read-only-smoke.json).
+- Current production service restart passed with local Nemotron available. The read-only checkpoint observed **six visible agents, six sources, and twelve completed jobs**. The owner continued using production during QA; earlier agent configurations and historical jobs were preserved, while runtime activity and source refresh timestamps advanced.
+- The rewritten `scripts/smoke.py` checks health, API contracts, initial SSE snapshot, and served production assets using GET requests only. It does not submit inference or mutate user/application records. The current checkpoint passed seven read-only contracts and verified the production HTML and all three JS/CSS assets matched the current disk build. Its result is recorded in [read-only smoke evidence](evidence/read-only-smoke.json).
+
+## Current categories and workspace update
+
+- Durable categories have a name and color and can be created during agent creation or from the directory. Existing agents receive a category mapping without changing their IDs or saved records. Moving an existing agent changes only its category; automated tests verify that its actual role, tools, sources, and task history are preserved. Choosing a Security or Optimizer category does not grant that role's tools.
+- An actual Optimizer identity can explicitly review an active Finance identity's saved job evidence and measured team workloads. The deterministic review records a durable `agent_interaction` event with exact participants and completion times only after computing the review. Tests verify invoice evidence provenance, the explicit no-audit result, role boundaries, and no inference or control/payment side effects.
+- The workspace independently represents idle and working agents, including typing. A warm-colored busy effect uses that agent's real queued work or elapsed running time, not NVIDIA temperature. A recent completed Optimizer-to-Finance review is represented by a brief recorded walk and greeting, rather than fabricated conversations or background model calls.
+- **Manage agents** opens the directory's existing Delete controls. Source Delete, confirmation, Undo, and Trash remain available. The assistant uses a compact launcher and expandable conversation panel.
+
+Current browser QA used an isolated database on port 8001 with public project documents, leaving production records out of the demonstration:
+
+- Created Research and Operations categories, created individual custom agents, and verified their category placement and exact-ID selection. Moving a category preserves the role and permissions.
+- Completed **twelve agent requests and one assistant request** using real `nemotron3:33b`, with **41,469 reported tokens**. All thirteen retained selected-source passages and valid model citation IDs. Source grounding does not certify every generated claim.
+- Uploaded the actual user guide and frontend manifest, and connected the public `Deepak91234/localops-ai` GitHub API without credentials. The assistant's guide-only response explained Undo and Trash with a guide citation.
+- Observed an actual one-running/two-queued backlog on Operations advisor and its warm workload effect; completed agents cooled afterward. Idle, typing, motion-off, and recorded review transitions were checked. Returning to the maintained hidden canvas can briefly show its prior state until it resizes and receives current props.
+- Saved two exact Optimizer-to-Finance reviews and observed character movement for the completed review. No Finance invoice audit existed in this workspace, and the review explicitly reported unavailable invoice evidence. The walk's category labels can obscure the visiting character at the default camera angle.
+- The controlled security test refused `network.export` with `executed:false`; no network export occurred.
+- Deleted and restored both custom agent identities. Operations advisor retained its three completed jobs and category. Deleted and restored both uploaded sources; the restored manifest was private and unassigned. Manage agents, confirmation cancellation, Undo, and Trash controls were exercised.
+- At 390×844 and 390×480, the compact assistant stayed within the viewport without horizontal document overflow. Delete, Keep, and Restore targets measured 44px. The normal viewport was restored.
+
+[Current live verification](evidence/categories-workspace-live.json) · [Actual workload screenshot](evidence/agent-workload-animation.png) · [Saved review screenshot](evidence/recorded-finance-review.png).
+
+A local captioned walkthrough records the actual UI, shortened between actions: `project-materials/demo/LocalOps_AI_60_Second_Demo.mp4`. Export checks passed: **60.0 seconds, 1920×1080, H.264, yuv420p, 30 fps, all 1,800 frames decoded**, fast-start MP4. Captured UI motion uses 12 frames per second held into the 30 fps export; no application state or motion was generated. There is no audio track. Raw captures and video remain local and excluded from Git.
+
+The following source-ingestion observations belong to the preceding release and remain dated historical evidence.
 
 ## Real source-backed agent and assistant requests
 

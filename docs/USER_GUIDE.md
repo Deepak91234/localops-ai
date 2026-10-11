@@ -16,7 +16,9 @@ Linked sources can refresh every five minutes, fifteen minutes, or hour, or only
 
 ## Create and test an agent
 
-Choose **Create agent**, select HR, Finance, or **Other**, name the agent, and describe its work. For Other, write your own purpose. Upload or link knowledge in the creation dialog, or select sources already in the library. Shared sources are included automatically. Sources can also be added later.
+Choose **Create agent**, select HR, Finance, or **Other**, name the agent, and describe its work. For Other, write your own purpose. Choose an existing team category or create one with a name and color in the dialog. Upload or link knowledge in the creation dialog, or select sources already in the library. Shared sources are included automatically. Sources can also be added later.
+
+Use **Add category** in the agent directory to create another team group. To move an existing agent, open its page and change **Team category**. Categories and your selections survive a restart. Moving an agent preserves its identity, actual role, approved tools, sources, and task history. Categories organize the team; they do not grant extra permissions.
 
 Click **Test agent** to open and focus the request form. Enter a question about its assigned records and submit it. A paused agent shows a Resume action. Replies retain source passages, model information, and actual request timings in Tasks. If no searchable knowledge is available, the agent asks you to add it instead of substituting demo records.
 
@@ -24,7 +26,7 @@ Finance can compute exact invoice totals from one CSV ledger with six unique col
 
 ## Delete or restore
 
-In **All agents** or the workspace **Agent list**, use the agent card's **Delete** button. An individual workspace also has **Delete agent**. In **Knowledge sources**, each source has **Delete**. The confirmation describes the effect and initially focuses the Keep button; Escape cancels.
+Choose **Manage agents** above the living workspace to open **All agents**, then use the agent card's **Delete** button. The workspace **Agent list** also has Delete controls, and an individual workspace has **Delete agent**. In **Knowledge sources**, each source has **Delete**. The confirmation describes the effect and initially focuses the Keep button; Escape cancels.
 
 Deleted agents leave the living workspace and their open tabs close. Queued work is cancelled, while prior task history is retained. An agent with running work cannot be deleted until that work finishes. Security and scheduler enforcement remain active even if their visible agent is removed.
 
@@ -32,11 +34,15 @@ Use **Undo** after deletion or open **Trash** in the sidebar to restore later. D
 
 ## Ask the assistant
 
-The bottom-right **I can help you** button opens the knowledge assistant. Select the sources you want it to use, then ask for a summary, a policy answer, or recommendations about those records. Shared searchable sources are selected initially; you can change the selection. Follow-up questions retain the recent conversation and use the current source selection. Replies cite the retrieved passages.
+The compact bottom-right **I can help you** button opens the knowledge assistant when needed. Select the sources you want it to use, then ask for a summary, a policy answer, or recommendations about those records. Shared searchable sources are selected initially; you can change the selection. Follow-up questions retain the recent conversation and use the current source selection. Replies cite the retrieved passages. Clear the source selection for general local assistance without supplying business records.
 
 ## Review operations
 
 Agent Resources shows measured job timing and API-reported tokens. System monitor shows shared GX10 readings. Cost estimates require a configured hourly rate and are not payments. Optimizer recommendations use actual saved workloads; pausing intake does not unload the shared model. Security and scheduler checks are explicit controlled test scenarios.
+
+On an Optimizer page, choose an active Finance teammate and click **Review with Finance**. This compares saved team workloads and that Finance agent's recorded invoice evidence, when available. If no invoice audit exists, the review says so. It records a completed interaction without generating a new model response, changing queue policy, pausing agents, or making payments. Choose **Watch in workspace** to see the recent recorded review represented by a brief walk and greeting.
+
+Characters animate independently: an idle agent rests while an agent with running work types. A warm-colored busy effect means that agent has an actual backlog or a longer-running job. It does not indicate GPU temperature or a measured hardware allocation. **Motion on/off** controls workspace movement; actual job states remain visible in the agent pages.
 
 Source contents and API responses are treated as data. They do not grant agent tool permissions. Agents do not execute shell commands, send messages, export company records, or initiate payments.
 

@@ -63,7 +63,13 @@ def run(output):
             require(all(isinstance(identity, str) and identity for identity in agent_ids + source_ids), "Missing identity")
             require(len(agent_ids) == len(set(agent_ids)) and len(source_ids) == len(set(source_ids)), "Duplicate identities")
             require("__assistant__" not in agent_ids and len(agents) <= 30, "Visible workforce contract failed")
+            categories = get("/api/categories")
+            require(isinstance(categories, list), "Category list contract failed")
+            category_ids = [category.get("id") for category in categories]
+            require(len(category_ids) == len(set(category_ids)), "Duplicate category identities")
+            require(all(isinstance(category.get("name"), str) and isinstance(category.get("color"), str) for category in categories), "Category display contract failed")
             for agent in agents:
+                require(agent.get("category_id") in category_ids, "Agent has no persisted category")
                 require(agent.get("status") in STATUSES and isinstance(agent.get("source_ids"), list), "Agent status/source contract failed")
                 require(set(agent["source_ids"]).issubset(set(source_ids)), "Agent points to a missing source")
                 insight = get(f"/api/agents/{agent['id']}/insights")
@@ -80,6 +86,7 @@ def run(output):
                 require(isinstance(job.get("id"), str) and job.get("status") in STATUSES and isinstance(job.get("metrics"), dict), "Job contract failed")
             report["state_counts"] = {"visible_agents": len(agents), "sources": len(sources), "returned_jobs": len(jobs), "completed_jobs": sum(job["status"] == "completed" for job in jobs)}
             report["checks"].append("agent identities, sources/access/previews, jobs, and all visible agent insights")
+            report["checks"].append("durable category identities and complete workforce category assignment")
 
             system, metrics, activity = get("/api/system"), get("/api/metrics"), get("/api/activity")
             require(system.get("security", {}).get("binding") == "loopback-only" and system["security"].get("inference_local_only") is True, "Local boundary contract failed")
@@ -89,7 +96,7 @@ def run(output):
             report["checks"].append("system boundaries, metrics/activity, and saved comparison read")
 
             schema = get("/openapi.json")
-            for path, method in (("/api/sources/upload", "post"), ("/api/sources/link", "post"), ("/api/sources/{source_id}/refresh", "post"), ("/api/sources/{source_id}/access", "post"), ("/api/agents/{agent_id}/sources", "post"), ("/api/assistant", "post"), ("/api/agents", "post"), ("/api/jobs", "post")):
+            for path, method in (("/api/sources/upload", "post"), ("/api/sources/link", "post"), ("/api/sources/{source_id}/refresh", "post"), ("/api/sources/{source_id}/access", "post"), ("/api/agents/{agent_id}/sources", "post"), ("/api/assistant", "post"), ("/api/agents", "post"), ("/api/jobs", "post"), ("/api/categories", "post"), ("/api/agents/{agent_id}/category", "post"), ("/api/agents/{optimizer_id}/allocation-review", "post"), ("/api/agents/{agent_id}/delete", "post"), ("/api/sources/{source_id}/delete", "post")):
                 require(method in schema.get("paths", {}).get(path, {}), f"Missing documented contract: {method} {path}")
             report["checks"].append("OpenAPI source, agent, and assistant command schemas (not executed)")
 

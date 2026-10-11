@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Literal
 from urllib.parse import parse_qsl, unquote, urlsplit
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
 
 
 def utc_now() -> str:
@@ -36,6 +36,7 @@ class AgentCreate(BaseModel):
     tools: list[Permission] = Field(min_length=1, max_length=3)
     source: str = Field(default="", max_length=200)
     source_ids: list[str] = Field(default_factory=list, max_length=100)
+    category_id: str | None = Field(default=None, min_length=1, max_length=100)
 
 
 class Agent(BaseModel):
@@ -46,6 +47,7 @@ class Agent(BaseModel):
     tools: list[str]
     source: str
     source_ids: list[str] = Field(default_factory=list)
+    category_id: str | None = None
     status: AgentStatus = AgentStatus.idle
     enabled: bool = True
     created_at: str | None = None
@@ -55,6 +57,35 @@ class Agent(BaseModel):
 class AgentControl(BaseModel):
     model_config = ConfigDict(extra="forbid")
     action: Literal["pause", "resume"]
+
+
+class CategoryCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=60)
+    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
+
+    @field_validator("name")
+    @classmethod
+    def readable_name(cls, value):
+        value = " ".join(value.split())
+        if not value:
+            raise ValueError("Category name cannot be blank.")
+        return value
+
+    @field_validator("color")
+    @classmethod
+    def normalized_color(cls, value):
+        return value.lower()
+
+
+class AllocationReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    finance_agent_id: str | None = Field(default=None, min_length=1, max_length=100)
+
+
+class AgentCategory(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    category_id: str = Field(min_length=1, max_length=100)
 
 
 class SourceAccess(BaseModel):

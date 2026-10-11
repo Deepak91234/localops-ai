@@ -1,11 +1,12 @@
 {
-  "timestamp": "2026-10-11T19:45:11.304304+00:00",
+  "timestamp": "2026-10-11T20:23:12.729115+00:00",
   "base_url": "http://127.0.0.1:8000",
   "mode": "read-only GET contracts; no user-data mutation or inference submission",
   "offline_wan_test": "not performed",
   "checks": [
     "health and existing local inference availability",
     "agent identities, sources/access/previews, jobs, and all visible agent insights",
+    "durable category identities and complete workforce category assignment",
     "system boundaries, metrics/activity, and saved comparison read",
     "OpenAPI source, agent, and assistant command schemas (not executed)",
     "initial live SSE snapshot (stream closed after reading)",
@@ -19,13 +20,13 @@
     "scheduler_policy": "priority"
   },
   "state_counts": {
-    "visible_agents": 16,
+    "visible_agents": 6,
     "sources": 6,
-    "returned_jobs": 8,
-    "completed_jobs": 8
+    "returned_jobs": 12,
+    "completed_jobs": 12
   },
   "production_build": {
-    "entry_sha256": "d798bc1144a7dddef5ee1ff1835b63511297c6844c2d48cef39bed0fe71f8304",
+    "entry_sha256": "d6256dd1e938ca8e2d3c42526be6431e4b865e2783d7ee4decbbdd181e035a0e",
     "verified_js_css_assets": 3,
     "browser_execution_tested": false
   },

@@ -3,6 +3,7 @@ import sqlite3
 import threading
 from pathlib import Path
 from .agents import DEFAULT_AGENTS
+from .categories import DEFAULT_CATEGORIES, fallback_category
 from .models import utc_now
 
 
@@ -13,7 +14,7 @@ class Store:
         self.connection = sqlite3.connect(str(path), check_same_thread=False)
         self.connection.execute("PRAGMA journal_mode=WAL")
         self.lock = threading.RLock()
-        for table in ("agents", "jobs", "events", "settings", "sources"):
+        for table in ("agents", "jobs", "events", "settings", "sources", "categories"):
             self.connection.execute(f"CREATE TABLE IF NOT EXISTS {table} (id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
         self.connection.commit()
         for agent in DEFAULT_AGENTS:
@@ -105,9 +106,19 @@ class Store:
                 agent.update(source="", source_ids=agent.get("source_ids", []))
                 self.put("agents", agent)
 
+    def migrate_categories(self):
+        for category in DEFAULT_CATEGORIES:
+            if self.get("categories", category["id"]) is None:
+                self.put("categories", category)
+        valid = {category["id"] for category in self.all("categories")}
+        for agent in self.all("agents"):
+            if agent.get("category_id") not in valid:
+                agent["category_id"] = fallback_category(agent["role"])
+                self.put("agents", agent)
+
     @staticmethod
     def _table(table):
-        if table not in {"agents", "jobs", "events", "settings", "sources"}:
+        if table not in {"agents", "jobs", "events", "settings", "sources", "categories"}:
             raise ValueError("Invalid storage table")
 
     def close(self):

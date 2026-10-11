@@ -4,7 +4,10 @@ import { Html, OrbitControls, RoundedBox, useCursor } from '@react-three/drei'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 
-export type WorldAgent = { id: string; name?: string; role: string; status: string; tagId?: string }
+export type WorldAgent = { id: string; name?: string; role: string; status: string; category_id?: string; last_activity_at?: string | null; tagId?: string }
+export type WorldCategory = { id: string; name: string; color: string; built_in?: boolean }
+export type WorldWorkload = { running_jobs?: number; queued_jobs?: number; running_since?: string | null }
+export type WorldInteraction = { id: string; interaction_id?: string; from_agent_id: string; to_agent_id: string; status: string; started_at?: string; completed_at?: string; kind?: string }
 export type WorldProps = {
   agents: WorldAgent[]
   selected: string | null
@@ -12,6 +15,9 @@ export type WorldProps = {
   reducedMotion: boolean
   resetKey: number
   active?: boolean
+  categories?: WorldCategory[]
+  workloads?: Record<string, WorldWorkload>
+  interactions?: WorldInteraction[]
 }
 
 type Role = 'hr' | 'finance' | 'support' | 'security' | 'optimizer' | 'custom'
@@ -39,8 +45,8 @@ const normalizeRole = (role: string): string => {
 }
 const agentSeed = (id: string) => Array.from(id).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0)
 const agentRole = (agent: WorldAgent): Role => ZONES.find(zone => zone.role === normalizeRole(agent.role))?.role ?? 'custom'
-const agentColor = (agent: WorldAgent): string => {
-  const base = new THREE.Color(ZONES.find(zone => zone.role === agentRole(agent))?.color ?? '#94bdd0')
+const agentColor = (agent: WorldAgent, categoryColor?: string): string => {
+  const base = new THREE.Color(categoryColor ?? ZONES.find(zone => zone.role === agentRole(agent))?.color ?? '#94bdd0')
   const hsl = { h: 0, s: 0, l: 0 }
   base.getHSL(hsl)
   const seed = agentSeed(agent.id)
@@ -66,6 +72,7 @@ function Ball({ position, radius, color = WHITE, scale, emissive, intensity = 0 
 
 function Cable({ points, color = '#46616b', radius = .018, emissive = false }: { points: Point[]; color?: string; radius?: number; emissive?: boolean }) {
   const geometry = useMemo(() => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p))), 32, radius, 5, false), [points, radius])
+  useEffect(() => () => geometry.dispose(), [geometry])
   return <mesh geometry={geometry}>
     <meshStandardMaterial color={color} emissive={color} emissiveIntensity={emissive ? .5 : .03} roughness={.6} />
   </mesh>
@@ -108,9 +115,9 @@ function Desk({ accent, role }: { accent: string; role: Role }) {
     {[-.94, .94].map(x => <SoftBox key={x} size={[.15, .83, .77]} position={[x, .39, 0]} color="#344450" radius={.025} />)}
     <SoftBox size={[2.12, .055, .038]} position={[0, .85, .675]} color={accent} emissive={accent} intensity={.33} radius={.012} />
     <Monitor accent={accent} security={role === 'security'} />
-    <SoftBox size={[.75, .035, .29]} position={[.15, .999, .24]} color="#3a4e5a" radius={.027} />
-    {[0, 1, 2].map(row => <SoftBox key={row} size={[.62, .006, .012]} position={[.15, 1.022, .17 + row * .073]} color="#8898a0" radius={.002} />)}
-    <SoftBox size={[.19, .065, .26]} position={[.74, 1.015, .25]} color="#ced4d0" radius={.04} />
+    <SoftBox size={[.75, .035, .29]} position={[.15, .999, .40]} color="#3a4e5a" radius={.027} />
+    {[0, 1, 2].map(row => <SoftBox key={row} size={[.62, .006, .012]} position={[.15, 1.022, .33 + row * .073]} color="#8898a0" radius={.002} />)}
+    <SoftBox size={[.19, .065, .26]} position={[.74, 1.015, .43]} color="#ced4d0" radius={.04} />
     <mesh position={[-.83, 1.075, .26]} castShadow><cylinderGeometry args={[.1, .08, .2, 12]} /><meshStandardMaterial color={accent} roughness={.65} /></mesh>
     <mesh position={[-.83, 1.18, .26]}><cylinderGeometry args={[.085, .085, .007, 12]} /><meshStandardMaterial color="#263a38" /></mesh>
     {role === 'finance' && <group position={[-.78, .98, -.26]}>
@@ -211,86 +218,102 @@ function Accessory({ role, color }: { role: Role; color: string }) {
   return null
 }
 
-function Mascot({ role, color, status, reducedMotion, seed = 0 }: { role: Role; color: string; status: string; reducedMotion: boolean; seed?: number }) {
-  const root = useRef<THREE.Group>(null)
-  const head = useRef<THREE.Group>(null)
-  const left = useRef<THREE.Group>(null)
-  const right = useRef<THREE.Group>(null)
-  const stateAt = useRef(0)
-  useEffect(() => { stateAt.current = performance.now() / 1000 }, [status])
+function Mascot({ role, color, status, reducedMotion, seed = 0, atDesk = false, heavy = false, greeting = false, walking = false, lastActivityAt }: {
+  role: Role; color: string; status: string; reducedMotion: boolean; seed?: number; atDesk?: boolean; heavy?: boolean; greeting?: boolean; walking?: boolean; lastActivityAt?: string | null
+}) {
+  const root = useRef<THREE.Group>(null), torso = useRef<THREE.Group>(null), head = useRef<THREE.Group>(null), eyes = useRef<THREE.Group>(null), mouth = useRef<THREE.Mesh>(null)
+  const left = useRef<THREE.Group>(null), right = useRef<THREE.Group>(null), leftElbow = useRef<THREE.Group>(null), rightElbow = useRef<THREE.Group>(null)
+  const leftLeg = useRef<THREE.Group>(null), rightLeg = useRef<THREE.Group>(null), leftShin = useRef<THREE.Group>(null), rightShin = useRef<THREE.Group>(null)
+  const previousStatus = useRef(status), transitionAt = useRef<number | null>(null)
+  const working = status === 'running' && atDesk && !walking && !greeting
+  useEffect(() => {
+    // An old saved completed state never celebrates merely because it mounts.
+    if (status === 'completed' && ['running', 'queued'].includes(previousStatus.current)) transitionAt.current = Date.now()
+    previousStatus.current = status
+  }, [status])
   useFrame(({ clock }, delta) => {
-    if (!root.current || !head.current || !left.current || !right.current) return
-    const t = clock.elapsedTime + (seed % 13) * .31
-    const running = status === 'running'
-    const celebrating = status === 'completed' && performance.now() / 1000 - stateAt.current < 2.4
-    const breathing = reducedMotion ? 0 : Math.sin(t * 1.8) * .012
-    const bounce = !reducedMotion && celebrating ? Math.max(0, Math.sin((performance.now() / 1000 - stateAt.current) * 8)) * .16 : 0
-    root.current.position.y = .17 + breathing + bounce
-    root.current.rotation.z = reducedMotion ? 0 : Math.sin(t * 1.4) * .008
-    head.current.rotation.y = THREE.MathUtils.damp(head.current.rotation.y, !reducedMotion && status === 'queued' ? Math.sin(t * .7) * .24 : running ? -.08 : .07, 5, delta)
-    head.current.rotation.x = THREE.MathUtils.damp(head.current.rotation.x, running ? .08 : status === 'paused' ? -.055 : 0, 5, delta)
-    left.current.rotation.x = THREE.MathUtils.damp(left.current.rotation.x, running ? -.38 + (reducedMotion ? 0 : Math.sin(t * 5) * .1) : -.12, 6, delta)
-    right.current.rotation.x = THREE.MathUtils.damp(right.current.rotation.x, running ? -.7 + (reducedMotion ? 0 : Math.sin(t * 5 + 1.4) * .18) : -.13, 6, delta)
-    right.current.rotation.z = THREE.MathUtils.damp(right.current.rotation.z, celebrating ? -.95 : status === 'queued' ? -.25 : -.11, 5, delta)
-    left.current.rotation.z = THREE.MathUtils.damp(left.current.rotation.z, celebrating ? .38 : .12, 5, delta)
+    if (!root.current || !head.current || !left.current || !right.current || !torso.current) return
+    const t = clock.elapsedTime + (seed % 29) * .37
+    const stamp = lastActivityAt ? Date.parse(lastActivityAt) : transitionAt.current
+    const age = stamp === null || !Number.isFinite(stamp) ? Infinity : (Date.now() - stamp) / 1000
+    const celebrating = !reducedMotion && status === 'completed' && age >= 0 && age < 2.4 && !walking && !greeting
+    const damp = (current: number, target: number) => reducedMotion ? target : THREE.MathUtils.damp(current, target, 7, delta)
+    root.current.position.y = .17 + (reducedMotion ? 0 : walking ? Math.abs(Math.sin(t * 8)) * .035 : Math.sin(t * 1.65) * .009) + (!reducedMotion && celebrating ? Math.max(0, Math.sin(age * 8)) * .1 : 0)
+    root.current.rotation.z = reducedMotion ? 0 : walking ? Math.sin(t * 8) * .025 : Math.sin(t * 1.4) * .008
+    root.current.rotation.y = damp(root.current.rotation.y, working ? Math.PI + .08 : atDesk && !walking ? .12 : 0)
+    torso.current.position.y = damp(torso.current.position.y, working ? -.115 : 0)
+    torso.current.rotation.x = damp(torso.current.rotation.x, working ? .055 : 0)
+    head.current.rotation.y = damp(head.current.rotation.y, greeting ? -.2 : reducedMotion ? .04 : working ? Math.sin(t * .85) * .055 : Math.sin(t * .38) * .18)
+    head.current.rotation.x = damp(head.current.rotation.x, working ? .14 + (reducedMotion ? 0 : Math.sin(t * 3) * .018) : status === 'paused' ? -.045 : greeting && !reducedMotion ? Math.sin(t * 2.6) * .065 : 0)
+    const idleStretch = !reducedMotion && !working && !walking && !greeting && (t + seed) % 17 > 15.7
+    left.current.rotation.x = damp(left.current.rotation.x, walking ? Math.sin(t * 8) * .38 : working ? -1.02 + (reducedMotion ? 0 : Math.sin(t * 9.4) * .045) : -.1)
+    right.current.rotation.x = damp(right.current.rotation.x, walking ? -Math.sin(t * 8) * .38 : working ? -1.02 + (reducedMotion ? 0 : Math.sin(t * 9.4 + 1.5) * .045) : greeting ? -.7 : idleStretch ? -.32 : -.1)
+    right.current.rotation.z = damp(right.current.rotation.z, greeting || celebrating ? -.82 + (reducedMotion ? 0 : Math.sin(t * 4.1) * .09) : idleStretch ? -.55 : working ? -.07 : -.12)
+    left.current.rotation.z = damp(left.current.rotation.z, celebrating ? .3 : working ? .07 : .12)
+    if (leftElbow.current) leftElbow.current.rotation.x = damp(leftElbow.current.rotation.x, working ? -.63 + (reducedMotion ? 0 : Math.sin(t * 12) * .08) : -.06)
+    if (rightElbow.current) rightElbow.current.rotation.x = damp(rightElbow.current.rotation.x, working ? -.63 + (reducedMotion ? 0 : Math.sin(t * 12 + 2) * .08) : greeting ? -.7 : -.06)
+    for (const [leg, shin, side] of [[leftLeg.current, leftShin.current, 1], [rightLeg.current, rightShin.current, -1]] as const) {
+      if (leg) { leg.position.y = damp(leg.position.y, working ? .405 : .52); leg.rotation.x = damp(leg.rotation.x, working ? -1.05 : walking && !reducedMotion ? Math.sin(t * 8) * .43 * side : 0) }
+      if (shin) shin.rotation.x = damp(shin.rotation.x, working ? 1.05 : 0)
+    }
+    if (eyes.current) { const phase = (t + seed * .13) % 6.1; eyes.current.scale.y = reducedMotion ? 1 : phase > 5.91 ? .2 + Math.abs(phase - 6.005) * 8 : 1 }
+    if (mouth.current) mouth.current.scale.y = !reducedMotion && greeting ? 1 + Math.sin(t * 7) * .2 : 1
   })
   const alert = ['error', 'blocked', 'security_blocked'].includes(status)
-  const indicator = alert || status === 'queued' ? '#e2b779' : status === 'completed' ? '#83c5a7' : status === 'paused' ? '#8395a4' : color
+  const indicator = heavy ? '#e58978' : alert || status === 'queued' ? '#e2b779' : status === 'completed' ? '#83c5a7' : status === 'paused' ? '#8395a4' : color
+  const skin = new THREE.Color(WHITE).lerp(new THREE.Color(heavy ? '#efa08d' : '#efcda6'), heavy ? .32 : status === 'running' ? .05 : 0).getStyle()
+  const glow = heavy ? '#e66650' : '#000000'
   return <group ref={root} position={[0, .17, 0]}>
-    <Ball position={[-.21, .12, .11]} radius={.18} scale={[.86, .64, 1.45]} />
-    <Ball position={[.21, .12, .11]} radius={.18} scale={[.86, .64, 1.45]} />
-    <mesh position={[-.2, .35, 0]} castShadow><capsuleGeometry args={[.135, .21, 5, 12]} /><meshStandardMaterial color={WHITE} roughness={.65} /></mesh>
-    <mesh position={[.2, .35, 0]} castShadow><capsuleGeometry args={[.135, .21, 5, 12]} /><meshStandardMaterial color={WHITE} roughness={.65} /></mesh>
-    <Ball position={[0, .77, 0]} radius={.43} scale={[1, 1.24, .92]} />
-    <SoftBox size={[.29, .08, .11]} position={[0, 1.05, .33]} color={color} radius={.03} />
-    <Ball position={[0, 1.09, .37]} radius={.035} color="#dcece7" />
-    <group ref={head} position={[0, 1.56, 0]}>
-      <Ball position={[0, 0, 0]} radius={.55} scale={[1.04, .96, 1]} />
-      <Ball position={[-.56, -.04, 0]} radius={.105} scale={[.7, 1, .82]} />
-      <Ball position={[.56, -.04, 0]} radius={.105} scale={[.7, 1, .82]} />
-      <Ball position={[-.165, .035, .523]} radius={.045} color="#17232c" scale={[.92, 1.12, .42]} />
-      <Ball position={[.165, .035, .523]} radius={.045} color="#17232c" scale={[.92, 1.12, .42]} />
-      <Ball position={[-.22, -.087, .499]} radius={.048} color="#cfdbd7" scale={[1, .46, .15]} />
-      <Ball position={[.22, -.087, .499]} radius={.048} color="#cfdbd7" scale={[1, .46, .15]} />
-      <mesh position={[0, -.115, .526]} rotation={[0, 0, Math.PI]}>
-        <torusGeometry args={[alert ? .09 : .115, .012, 5, 18, Math.PI]} />
-        <meshStandardMaterial color="#26343b" roughness={.8} />
-      </mesh>
-      <mesh position={[.016, .519, -.05]} rotation={[.18, 0, -.2 + (seed % 7 - 3) * .08]} castShadow><capsuleGeometry args={[.063, .13, 4, 10]} /><meshStandardMaterial color={WHITE} roughness={.7} /></mesh>
-      {role === 'support' && <group>
-        <mesh position={[0, -.02, 0]}><torusGeometry args={[.583, .031, 6, 28, Math.PI]} /><meshStandardMaterial color="#3a5160" roughness={.5} /></mesh>
-        {[-1, 1].map(side => <SoftBox key={side} size={[.105, .23, .21]} position={[side * .59, -.045, 0]} color="#3a5160" radius={.04} />)}
-        <Cable points={[[.59, -.11, .08], [.57, -.22, .29], [.3, -.24, .51]]} color="#3c5360" radius={.025} />
-        <Ball position={[.3, -.24, .51]} radius={.044} color={color} />
-      </group>}
-    </group>
-    <group ref={left} position={[-.445, 1.04, 0]} rotation={[0, 0, .12]}>
-      <mesh position={[0, -.16, 0]} castShadow><capsuleGeometry args={[.13, .27, 5, 12]} /><meshStandardMaterial color={WHITE} roughness={.64} /></mesh>
-      <Ball position={[0, -.36, .015]} radius={.145} />
-      <Accessory role={role} color={color} />
-    </group>
-    <group ref={right} position={[.445, 1.04, 0]} rotation={[0, 0, -.11]}>
-      <mesh position={[0, -.16, 0]} castShadow><capsuleGeometry args={[.13, .27, 5, 12]} /><meshStandardMaterial color={WHITE} roughness={.64} /></mesh>
-      <Ball position={[0, -.36, .015]} radius={.145} />
+    {([-1, 1] as const).map(side => <group key={side} ref={side === -1 ? leftLeg : rightLeg} position={[side * .2, .52, 0]}>
+      <mesh position={[0, -.11, 0]} castShadow><capsuleGeometry args={[.135, .15, 4, 10]} /><meshStandardMaterial color={skin} roughness={.65} /></mesh>
+      <Ball position={[0, -.23, 0]} radius={.135} color={skin} />
+      <group ref={side === -1 ? leftShin : rightShin} position={[0, -.23, 0]}>
+        <mesh position={[0, -.115, 0]} castShadow><capsuleGeometry args={[.12, .13, 4, 10]} /><meshStandardMaterial color={skin} roughness={.65} /></mesh>
+        <Ball position={[0, -.30, .1]} radius={.17} color={skin} scale={[.9, .6, 1.4]} />
+      </group>
+    </group>)}
+    <group ref={torso}>
+      <Ball position={[0, .77, 0]} radius={.43} scale={[1, 1.18, .92]} color={skin} emissive={glow} intensity={heavy ? .24 : 0} />
+      <SoftBox size={[.29, .08, .11]} position={[0, 1.05, .33]} color={color} emissive={indicator} intensity={heavy ? .7 : .08} radius={.03} />
+      <Ball position={[0, 1.09, .37]} radius={.035} color="#dcece7" />
+      <group ref={head} position={[0, 1.56, 0]}>
+        <Ball position={[0, 0, 0]} radius={.55} scale={[1.04, .96, 1]} color={skin} emissive={glow} intensity={heavy ? .16 : 0} />
+        {[-1, 1].map(side => <Ball key={side} position={[side * .56, -.04, 0]} radius={.105} color={skin} scale={[.7, 1, .82]} />)}
+        <group ref={eyes} position={[0, .035, .523]}>{[-1, 1].map(side => <Ball key={side} position={[side * .165, 0, 0]} radius={.045} color="#17232c" scale={[.92, 1.12, .42]} />)}</group>
+        {[-1, 1].map(side => <Ball key={side} position={[side * .22, -.087, .499]} radius={.048} color="#cfdbd7" scale={[1, .46, .15]} />)}
+        <mesh ref={mouth} position={[0, -.115, .526]} rotation={[0, 0, Math.PI]}><torusGeometry args={[alert ? .09 : .115, .012, 5, 18, Math.PI]} /><meshStandardMaterial color="#26343b" roughness={.8} /></mesh>
+        <mesh position={[.016, .519, -.05]} rotation={[.18, 0, -.2 + (seed % 7 - 3) * .08]} castShadow><capsuleGeometry args={[.063, .13, 4, 10]} /><meshStandardMaterial color={skin} roughness={.7} /></mesh>
+        {role === 'support' && <group>
+          <mesh position={[0, -.02, 0]}><torusGeometry args={[.583, .031, 6, 28, Math.PI]} /><meshStandardMaterial color="#3a5160" roughness={.5} /></mesh>
+          {[-1, 1].map(side => <SoftBox key={side} size={[.105, .23, .21]} position={[side * .59, -.045, 0]} color="#3a5160" radius={.04} />)}
+          <Cable points={[[.59, -.11, .08], [.57, -.22, .29], [.3, -.24, .51]]} color="#3c5360" radius={.025} />
+          <Ball position={[.3, -.24, .51]} radius={.044} color={color} />
+        </group>}
+      </group>
+      {([-1, 1] as const).map(side => <group key={side} ref={side === -1 ? left : right} position={[side * .445, 1.04, 0]} rotation={[0, 0, -side * .12]}>
+        <mesh position={[0, -.13, 0]} castShadow><capsuleGeometry args={[.12, .16, 4, 10]} /><meshStandardMaterial color={skin} roughness={.64} /></mesh>
+        <Ball position={[0, -.28, 0]} radius={.12} color={skin} />
+        <group ref={side === -1 ? leftElbow : rightElbow} position={[0, -.28, 0]}>
+          <mesh position={[0, -.11, 0]} castShadow><capsuleGeometry args={[.11, .13, 4, 10]} /><meshStandardMaterial color={skin} roughness={.64} /></mesh>
+          <Ball position={[0, -.245, .015]} radius={.13} color={skin} />
+          {side === -1 && !working && <Accessory role={role} color={color} />}
+        </group>
+      </group>)}
     </group>
     <group position={[.72, 2.13, .02]}>
-      <Ball position={[0, 0, 0]} radius={.074} color={indicator} emissive={indicator} intensity={.45} />
+      <Ball position={[0, 0, 0]} radius={.074} color={indicator} emissive={indicator} intensity={heavy ? .95 : .45} />
       {(alert || status === 'queued') && <mesh rotation={[0, 0, .15]}><torusGeometry args={[.12, .011, 5, 20]} /><meshStandardMaterial color={indicator} /></mesh>}
-      {status === 'queued' && <group position={[0, 0, .078]}>
-        <SoftBox size={[.013, .065, .01]} position={[0, .026, 0]} color="#354048" radius={.003} />
-        <SoftBox size={[.053, .013, .01]} position={[.022, 0, 0]} color="#354048" radius={.003} />
-      </group>}
     </group>
   </group>
 }
 
-function AgentNameTag({ agent, role, position, accent, selected, compact, labelScale = 1, onSelect, onHover }: {
-  agent?: WorldAgent; role: Role; position: Point; accent: string; selected: boolean; compact: boolean; labelScale?: number
+function AgentNameTag({ agent, role, position, accent, selected, compact, labelScale = 1, workload, workState, interactionLabel, onSelect, onHover }: {
+  agent?: WorldAgent; role: Role; position: Point; accent: string; selected: boolean; compact: boolean; labelScale?: number; workload?: WorldWorkload; workState?: 'working' | 'heavy workload'; interactionLabel?: string
   onSelect: (id: string) => void; onHover: (id: string | null) => void
 }) {
   const name = agent?.name || (agent ? `${ROLE_NAME[role]} agent` : `${ROLE_NAME[role]} station`)
   return <Html position={position} center style={{ pointerEvents: 'auto', whiteSpace: 'nowrap' }}>
-    <button type="button" disabled={!agent} aria-pressed={selected} aria-label={agent ? `Open ${name}, ${ROLE_NAME[role]} agent ${agent.id}, ${agent.status}` : name} title={agent ? `${name} · ${ROLE_NAME[role]} · ${agent.id}` : name}
+    <button type="button" disabled={!agent} aria-pressed={selected} aria-label={agent ? `Open ${name}, ${ROLE_NAME[role]} agent ${agent.id}, ${workState || agent.status}${workState === 'heavy workload' ? ', workload visualization, not measured GPU temperature' : ''}${interactionLabel ? `, ${interactionLabel}` : ''}` : name} title={agent ? `${name} · ${ROLE_NAME[role]} · ${agent.id}${workState ? ` · ${workState}` : ''}${workState === 'heavy workload' ? ' (not measured GPU temperature)' : ''}${interactionLabel ? ` · ${interactionLabel}` : ''}` : name}
       onClick={() => agent && onSelect(agent.id)} onMouseEnter={() => agent && onHover(agent.id)} onMouseLeave={() => onHover(null)} onFocus={() => agent && onHover(agent.id)} onBlur={() => onHover(null)}
       style={{ padding: compact ? '5px 7px' : '5px 9px', border: `1px solid ${selected ? accent : '#69828b33'}`, borderRadius: 6, color: '#ecf2f2', background: selected ? '#243b42e8' : '#13202be8', cursor: agent ? 'pointer' : 'default', fontFamily: 'inherit', textAlign: 'left', boxShadow: '0 5px 20px #0003', minWidth: compact ? 60 : 88, maxWidth: compact ? 100 : 140, transform: `scale(${labelScale})`, transformOrigin: 'center' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: compact ? 4 : 6, fontSize: compact ? 9 : 10, fontWeight: 650, letterSpacing: '.025em' }}>
@@ -298,103 +321,163 @@ function AgentNameTag({ agent, role, position, accent, selected, compact, labelS
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
         {!compact && <span style={{ marginLeft: 'auto', fontSize: 10, opacity: .4 }}>↗</span>}
       </span>
-      <span style={{ display: 'block', marginTop: 3, fontSize: compact ? 6 : 7, color: '#8b9da8', letterSpacing: '.07em', textTransform: 'uppercase' }}>{ROLE_NAME[role]}{agent?.tagId ? ` · ${agent.tagId}` : ''}{agent ? ` · ${agent.status.replaceAll('_', ' ')}` : ' · unoccupied'}</span>
+      <span style={{ display: 'block', marginTop: 3, fontSize: compact ? 6 : 7, color: workState === 'heavy workload' ? '#e7ae9e' : '#8b9da8', letterSpacing: '.07em', textTransform: 'uppercase' }}>{ROLE_NAME[role]}{agent?.tagId ? ` · ${agent.tagId}` : ''}{agent ? ` · ${workState || agent.status.replaceAll('_', ' ')}` : ' · unoccupied'}{workload?.queued_jobs ? ` · ${workload.queued_jobs} queued` : ''}</span>
+      {interactionLabel && <span style={{display:'block',marginTop:4,fontSize:7,color:'#b9dbcc',whiteSpace:'normal'}}>{interactionLabel}</span>}
     </button>
   </Html>
 }
 
-function Station({ zone, agent, selected, hovered, reducedMotion, compactLabels, labelScale, onSelect, onHover }: {
-  zone: (typeof ZONES)[number]; agent?: WorldAgent; selected: boolean; hovered: boolean; reducedMotion: boolean; compactLabels: boolean; labelScale: number
-  onSelect: (id: string) => void; onHover: (id: string | null) => void
-}) {
-  const status = agent?.status ?? 'idle'
-  const alert = ['error', 'blocked', 'security_blocked'].includes(status)
-  const color = agent ? agentColor(agent) : zone.color
-  const accent = alert ? '#dfb176' : color
-  const handleSelect = (event: ThreeEvent<MouseEvent>) => { event.stopPropagation(); if (agent) onSelect(agent.id) }
-  return <group position={zone.position}
-    onClick={handleSelect}
-    onPointerOver={event => { event.stopPropagation(); if (agent) onHover(agent.id) }}
-    onPointerOut={() => onHover(null)}>
-    <SoftBox size={[4.4, .20, 3.65]} position={[0, .03, -.15]} color={selected ? '#334a53' : hovered ? '#30404c' : '#273540'} radius={.18} />
-    <SoftBox size={[4.17, .027, 3.39]} position={[0, .142, -.15]} color="#30414c" radius={.14} />
-    <SoftBox size={[3.9, .018, .025]} position={[0, .166, 1.57]} color={accent} emissive={accent} intensity={selected ? 1 : .27} radius={.007} />
-    {selected && <group>
-      <SoftBox size={[.025, .02, 3.05]} position={[-2.04, .166, -.15]} color={accent} emissive={accent} intensity={.6} radius={.007} />
-      <SoftBox size={[.025, .02, 3.05]} position={[2.04, .166, -.15]} color={accent} emissive={accent} intensity={.6} radius={.007} />
-    </group>}
-    <group position={[0, .15, 0]}>
-      <Desk accent={accent} role={zone.role} />
-      {agent && <group position={[.12, 0, .95]} rotation={[0, .20, 0]}><Mascot key={agent.id} role={zone.role} color={color} status={status} reducedMotion={reducedMotion} seed={agentSeed(agent.id)} /></group>}
-      {zone.role === 'hr' && <FilingCabinet position={[-1.62, 0, -.73]} accent={accent} />}
-      {zone.role === 'finance' && <group position={[-1.62, 0, -.77]}>
-        <SoftBox size={[.72, .9, .68]} position={[0, .46, 0]} color="#536371" radius={.07} />
-        <SoftBox size={[.63, .018, .5]} position={[0, .93, .025]} color="#b7c1bd" radius={.02} />
-        <SoftBox size={[.43, .1, .29]} position={[0, .96, -.04]} color="#dee0d4" radius={.02} />
-        <SoftBox size={[.28, .029, .18]} position={[0, .66, .35]} color="#263847" radius={.015} />
-      </group>}
-      {zone.role === 'support' && <MessageWall accent={accent} />}
-      {zone.role === 'security' && <group position={[-1.62, 1.18, -.82]}><SoftBox size={[.72, 1.25, .28]} position={[0, -.51, -.14]} color="#384c58" radius={.08} /><Shield color={accent} scale={1.15} /></group>}
-      {zone.role === 'optimizer' && <WorkloadTracks accent={accent} active={status === 'running'} reducedMotion={reducedMotion} />}
-      <Plant position={[1.65, 0, -.95]} size={zone.role === 'optimizer' ? .6 : .76} />
-      <SoftBox size={[.53, .04, .43]} position={[-1.54, .06, .94]} color="#374b56" radius={.05} />
-      <SoftBox size={[.47, .26, .37]} position={[-1.54, .18, .94]} color="#62737c" radius={.07} />
-    </group>
-    <AgentNameTag agent={agent} role={zone.role} position={zone.role === 'optimizer' && !compactLabels ? [2.3, 1.35, -2.2] : [0, .22, 1.98]} accent={accent} selected={selected} compact={compactLabels} labelScale={labelScale} onSelect={onSelect} onHover={onHover} />
+const DEFAULT_CATEGORIES: WorldCategory[] = [...ZONES.map(zone => ({id:zone.role,name:zone.label,color:zone.color})), {id:'custom',name:'Custom',color:'#94bdd0'}]
+type CategoryZone = {category:WorldCategory;agents:WorldAgent[];position:Point;width:number;depth:number;columns:number}
+type AgentLocation = {position:Point;color:string;category:WorldCategory}
+function categoryLayout(agents:WorldAgent[],categories?:WorldCategory[]) {
+  const known = [...(categories?.length ? categories : DEFAULT_CATEGORIES)]
+  for (const agent of agents) { const id=agent.category_id || agentRole(agent); if(!known.some(category=>category.id===id)) known.push({id,name:`Category ${id.slice(-4)}`,color:'#94bdd0'}) }
+  const zones = known.map(category => {
+    const members=agents.filter(agent=>(agent.category_id||agentRole(agent))===category.id)
+    const columns=Math.min(Math.max(1,members.length),6,Math.max(1,Math.ceil(Math.sqrt(members.length*2))))
+    return {category,agents:members,position:[0,0,0] as Point,width:members.length ? columns*3.2+.7 : 3.1,depth:members.length ? Math.ceil(members.length/columns)*3.7+1.0 : 1.8,columns}
+  })
+  const rows:CategoryZone[][]=[]
+  let row:CategoryZone[]=[],width=0
+  // Small categories form a balanced room rather than one distant, very wide shelf.
+  const compactRoom=zones.length>=4&&zones.length<=9&&zones.every(zone=>zone.agents.length<=2)
+  for(const zone of zones){if(row.length&&(width+1.15+zone.width>28||(compactRoom&&row.length>=3))){rows.push(row);row=[];width=0}row.push(zone);width+=zone.width+(row.length>1?1.15:0)}
+  if(row.length)rows.push(row)
+  let z=0,roomWidth=17,hubZ=0
+  for(let index=0;index<rows.length;index++){
+    const members=rows[index],rowWidth=members.reduce((sum,zone)=>sum+zone.width,0)+(members.length-1)*1.15,rowDepth=Math.max(...members.map(zone=>zone.depth))
+    roomWidth=Math.max(roomWidth,rowWidth+2.0)
+    let x=-rowWidth/2
+    for(const zone of members){zone.position=[x+zone.width/2,0,z+zone.depth/2];x+=zone.width+1.15}
+    z+=rowDepth
+    if(index===0){hubZ=z+2.2;z+=4.4}else if(index<rows.length-1)z+=1.4
+  }
+  const roomDepth=Math.max(11,z+1.2),locations=new Map<string,AgentLocation>()
+  for(const zone of zones)zone.agents.forEach((agent,index)=>{
+    const cols=Math.min(zone.columns,zone.agents.length),col=index%cols,line=Math.floor(index/cols)
+    locations.set(agent.id,{position:[zone.position[0]+(col-(cols-1)/2)*3.2,.15,zone.position[2]-zone.depth/2+2.0+line*3.7],color:agentColor(agent,zone.category.color),category:zone.category})
+  })
+  return {zones,locations,roomWidth,roomDepth,hubPosition:[0,.04,hubZ] as Point}
+}
+
+function useWorkPressure(agent:WorldAgent,workload:WorldWorkload={}) {
+  const [,tick]=useState(0)
+  const working=agent.status==='running'||(workload.running_jobs??0)>0
+  const start=workload.running_since?Date.parse(workload.running_since):NaN
+  const elapsed=Number.isFinite(start)?Math.max(0,(Date.now()-start)/1000):0
+  useEffect(()=>{
+    if(!working||!Number.isFinite(start)||elapsed>=20)return
+    const timer=setTimeout(()=>tick(value=>value+1),Math.max(1,(20-elapsed)*1000))
+    return()=>clearTimeout(timer)
+  },[working,start])
+  return {working,heavy:working&&((workload.queued_jobs??0)>=2||elapsed>=20)}
+}
+
+function Chair({color}:{color:string}) {
+  return <group position={[0,0,.38]}>
+    <mesh position={[0,.26,0]} castShadow><cylinderGeometry args={[.07,.1,.4,12]}/><meshStandardMaterial color="#4b5d66" metalness={.4} roughness={.45}/></mesh>
+    <SoftBox size={[.79,.14,.73]} position={[0,.55,0]} color="#405665" radius={.07}/>
+    <SoftBox size={[.74,.12,.65]} position={[0,.64,-.015]} color="#526f7b" radius={.055}/>
+    <SoftBox size={[.77,.68,.14]} position={[0,.93,.31]} color="#405665" radius={.07}/>
+    <SoftBox size={[.64,.56,.07]} position={[0,.94,.225]} color={color} radius={.04}/>
+    {[-1,1].map(side=><SoftBox key={side} size={[.11,.07,.57]} position={[side*.46,.85,-.045]} color="#68818c" radius={.025}/>)}
+    {Array.from({length:5},(_,i)=>{const a=i*Math.PI*2/5;return <group key={i} rotation={[0,a,0]}><SoftBox size={[.07,.055,.53]} position={[0,.085,.22]} color="#526a76" radius={.025}/><Ball position={[0,.075,.46]} radius={.07} color="#182a35"/></group>})}
   </group>
 }
 
-const POD_COLUMNS = [0, -4.2, 4.2, -8.4, 8.4]
-function AgentPod({ agent, index, selected, hovered, reducedMotion, labelScale, onSelect, onHover }: {
-  agent: WorldAgent; index: number; selected: boolean; hovered: boolean; reducedMotion: boolean; labelScale: number
-  onSelect: (id: string) => void; onHover: (id: string | null) => void
+function WorkSmoke({seed}:{seed:number}) {
+  const clouds=useRef<THREE.Group>(null)
+  useFrame(({clock})=>{clouds.current?.children.forEach((object,index)=>{const mesh=object as THREE.Mesh<THREE.SphereGeometry,THREE.MeshBasicMaterial>,u=(clock.elapsedTime*.36+index*.23+(seed%9)*.1)%1;mesh.position.set(.62+Math.sin(u*5+index)*.12,2.15+u*1.15,-.06+Math.cos(u*4+index)*.08);mesh.scale.setScalar(.10+u*.18);mesh.material.opacity=Math.sin(u*Math.PI)*.13})})
+  return <group ref={clouds}>{Array.from({length:4},(_,i)=><mesh key={i} position={[.62,2.4+i*.1,0]}><sphereGeometry args={[1,10,8]}/><meshBasicMaterial color="#bdc6c7" transparent opacity={.08} depthWrite={false}/></mesh>)}</group>
+}
+
+const REPLAY_SECONDS=25
+function interactionPhase(interaction?:WorldInteraction) {
+  if(!interaction)return {active:false,walking:false,greeting:false,travel:0}
+  const end=interaction.completed_at?Date.parse(interaction.completed_at):NaN
+  if(interaction.status!=='completed'||!Number.isFinite(end))return {active:false,walking:false,greeting:false,travel:0}
+  const age=(Date.now()-end)/1000
+  if(age<0||age>=REPLAY_SECONDS)return {active:false,walking:false,greeting:false,travel:0}
+  const p=age/REPLAY_SECONDS
+  return {active:true,walking:p<.28||p>.65,greeting:p>=.28&&p<=.65,travel:p<.28?p/.28:p>.65?1-(p-.65)/.35:1}
+}
+
+function AgentActor({agent,location,destination,interaction,recipientInteraction,workload,selected,hovered,reducedMotion,labelScale,onSelect,onHover}:{
+  agent:WorldAgent;location:AgentLocation;destination?:AgentLocation;interaction?:WorldInteraction;recipientInteraction?:WorldInteraction;workload?:WorldWorkload;selected:boolean;hovered:boolean;reducedMotion:boolean;labelScale:number;onSelect:(id:string)=>void;onHover:(id:string|null)=>void
 }) {
-  const role = agentRole(agent)
-  const color = agentColor(agent)
-  const accent = ['error', 'blocked', 'security_blocked'].includes(agent.status) ? '#dfb176' : color
-  return <group position={[POD_COLUMNS[index % 5], 0, 8.2 + Math.floor(index / 5) * 3.8]}
-    onClick={event => { event.stopPropagation(); onSelect(agent.id) }}
-    onPointerOver={event => { event.stopPropagation(); onHover(agent.id) }} onPointerOut={() => onHover(null)}>
-    <SoftBox size={[3.72, .18, 3.38]} position={[0, .03, 0]} color={selected ? '#334a53' : hovered ? '#30404c' : '#273540'} radius={.17} />
-    <SoftBox size={[3.43, .022, 3.09]} position={[0, .139, 0]} color="#30414c" radius={.12} />
-    <SoftBox size={[3.28, .02, .025]} position={[0, .162, 1.54]} color={accent} emissive={accent} intensity={selected ? .8 : .28} radius={.006} />
-    <group position={[0, .15, -.68]}>
-      <SoftBox size={[2.83, .15, 1.0]} position={[0, .86, 0]} color="#6d7d86" radius={.07} />
-      {[-1.04, 1.04].map(x => <SoftBox key={x} size={[.12, .81, .68]} position={[x, .41, 0]} color="#3f5360" radius={.025} />)}
-      <SoftBox size={[.10, .32, .10]} position={[0, 1.10, -.21]} color="#506671" radius={.025} />
-      <SoftBox size={[.93, .54, .06]} position={[0, 1.41, -.23]} color="#4c626e" radius={.05} />
-      <SoftBox size={[.81, .42, .017]} position={[0, 1.41, -.19]} color="#182e38" radius={.03} />
-      {[0, 1, 2].map(row => <SoftBox key={row} size={[.53 - row * .08, .025, .012]} position={[-.045, 1.51 - row * .1, -.177]} color={row === 1 ? accent : '#64808b'} emissive={row === 1 ? accent : undefined} intensity={.3} radius={.006} />)}
-      <SoftBox size={[.63, .035, .23]} position={[.2, .96, .23]} color="#3f5561" radius={.03} />
-      <SoftBox size={[.21, .08, .24]} position={[.94, .99, .18]} color="#ccd6d2" radius={.035} />
-      <mesh position={[-.96, 1.05, .18]} castShadow><cylinderGeometry args={[.085, .072, .19, 12]} /><meshStandardMaterial color={color} roughness={.7} /></mesh>
-    </group>
-    <group position={[.1, .15, .66]} rotation={[0, .20, 0]}>
-      <Mascot role={role} color={color} status={agent.status} reducedMotion={reducedMotion} seed={agentSeed(agent.id)} />
-    </group>
-    {index % 3 === 0 && <Plant position={[-1.48, .15, -.83]} size={.55} />}
-    <AgentNameTag agent={agent} role={role} position={[0, .22, 1.89]} accent={accent} selected={selected} compact labelScale={hovered || selected ? 1 : labelScale} onSelect={onSelect} onHover={onHover} />
+  const actor=useRef<THREE.Group>(null),prior=useRef('')
+  const [pose,setPose]=useState({walking:false,greeting:false,recorded:false})
+  const {working,heavy}=useWorkPressure(agent,workload)
+  const path=useMemo(()=>destination?new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,0,.63),new THREE.Vector3(0,0,1.25),new THREE.Vector3((destination.position[0]-location.position[0])*.5,0,Math.max(1.25,destination.position[2]-location.position[2]+1.3)),new THREE.Vector3(destination.position[0]-location.position[0]-1.0,0,destination.position[2]-location.position[2]+.8)
+  ]):null,[destination,location])
+  useFrame((_,delta)=>{
+    if(!actor.current)return
+    const visit=interactionPhase(interaction),received=interactionPhase(recipientInteraction)
+    const walking=!!path&&visit.walking&&!reducedMotion,greeting=(visit.greeting||received.greeting)&&!reducedMotion
+    const signature=`${walking}:${greeting}:${visit.active||received.active}`
+    if(signature!==prior.current){prior.current=signature;setPose({walking,greeting,recorded:visit.active||received.active})}
+    if(path&&visit.active&&!reducedMotion){const point=path.getPoint(THREE.MathUtils.clamp(visit.travel,0,1));actor.current.position.copy(point);const tangent=path.getTangent(THREE.MathUtils.clamp(visit.travel,0,1));actor.current.rotation.y=visit.walking?Math.atan2(tangent.x,tangent.z)+(visit.travel===1?0:visit.travel>0&&((Date.now()-Date.parse(interaction!.completed_at!))/1000)>REPLAY_SECONDS*.65?Math.PI:0):Math.atan2(destination!.position[0]-location.position[0]-point.x,destination!.position[2]-location.position[2]-point.z)}
+    else{actor.current.position.x=reducedMotion?0:THREE.MathUtils.damp(actor.current.position.x,0,8,delta);actor.current.position.z=reducedMotion?(working ? .35 : .63):THREE.MathUtils.damp(actor.current.position.z,working ? .35 : .63,6,delta);actor.current.rotation.y=reducedMotion?0:THREE.MathUtils.damp(actor.current.rotation.y,0,8,delta)}
+  })
+  useEffect(()=>{
+    // A hidden canvas may miss the expiry frame. Reset the frame guard as well as
+    // its React pose so a later real review always restores its label and limbs.
+    prior.current=''
+    const visit=interactionPhase(interaction),received=interactionPhase(recipientInteraction)
+    setPose({walking:!!path&&visit.walking&&!reducedMotion,greeting:(visit.greeting||received.greeting)&&!reducedMotion,recorded:visit.active||received.active})
+    const ends=[interaction,recipientInteraction].flatMap(record=>record?.completed_at&&record.status==='completed'?[Date.parse(record.completed_at)]:[]).filter(Number.isFinite)
+    if(!ends.length)return
+    const remaining=REPLAY_SECONDS*1000-(Date.now()-Math.max(...ends))
+    if(remaining<=0)return
+    const timer=setTimeout(()=>{prior.current='';setPose({walking:false,greeting:false,recorded:false})},remaining)
+    return()=>clearTimeout(timer)
+  },[interaction?.id,interaction?.completed_at,interaction?.status,recipientInteraction?.id,recipientInteraction?.completed_at,recipientInteraction?.status,reducedMotion,!!path])
+  const status=working?'running':agent.status
+  return <group ref={actor} position={[0,0,.63]} onClick={(event:ThreeEvent<MouseEvent>)=>{event.stopPropagation();onSelect(agent.id)}} onPointerOver={event=>{event.stopPropagation();onHover(agent.id)}} onPointerOut={()=>onHover(null)}>
+    <Mascot role={agentRole(agent)} color={location.color} status={status} reducedMotion={reducedMotion} seed={agentSeed(agent.id)} atDesk heavy={heavy} walking={pose.walking} greeting={pose.greeting} lastActivityAt={agent.last_activity_at}/>
+    {heavy&&!reducedMotion&&<WorkSmoke seed={agentSeed(agent.id)}/>}
+    <AgentNameTag agent={agent} role={agentRole(agent)} position={[0,.18,1.15]} accent={heavy?'#e58978':location.color} selected={selected} compact labelScale={hovered||selected?1:labelScale} workload={workload} workState={heavy?'heavy workload':working?'working':undefined} interactionLabel={pose.recorded?'Finance review completed · recorded':undefined} onSelect={onSelect} onHover={onHover}/>
   </group>
 }
 
-function TeamAnnex({ rows }: { rows: number }) {
-  if (!rows) return null
-  const depth = rows * 3.8
+function CategoryIsland({zone,locations,selected,hovered,workloads,interactions,reducedMotion,labelScale,onSelect,onHover}:{
+  zone:CategoryZone;locations:Map<string,AgentLocation>;selected:string|null;hovered:string|null;workloads:Record<string,WorldWorkload>;interactions:WorldInteraction[];reducedMotion:boolean;labelScale:number;onSelect:(id:string)=>void;onHover:(id:string|null)=>void
+}) {
   return <group>
-    <SoftBox size={[2.25, .36, 1.48]} position={[0, -.25, 5.85]} color="#273d48" radius={.12} />
-    <SoftBox size={[21.5, .43, depth]} position={[0, -.28, 6.3 + depth / 2]} color="#16252f" radius={.2} />
-    <SoftBox size={[21.24, .045, depth - .24]} position={[0, -.035, 6.3 + depth / 2]} color="#1c2d37" radius={.16} />
-    <SoftBox size={[20.97, .024, .027]} position={[0, -.155, 6.3 + depth]} color="#638f94" emissive="#527e88" intensity={.3} radius={.006} />
-    {Array.from({ length: rows }, (_, row) => <SoftBox key={row} size={[20.5, .015, .016]} position={[0, .015, 6.38 + row * 3.8]} color="#41616c" emissive="#41616c" intensity={.25} radius={.005} />)}
-    {[-10.25, 10.25].map(x => <SoftBox key={x} size={[.018, .024, depth - .34]} position={[x, -.155, 6.3 + depth / 2]} color="#5b8990" emissive="#527e88" intensity={.2} radius={.005} />)}
-    <Cable points={[[0, .015, 3.1], [0, .015, 5.75], [0, .015, 6.3]]} color="#416d76" radius={.02} emissive />
+    <group position={zone.position}>
+      <SoftBox size={[zone.width,.18,zone.depth]} position={[0,.025,0]} color="#283945" radius={.16}/>
+      <SoftBox size={[zone.width-.22,.024,zone.depth-.22]} position={[0,.13,0]} color="#30434d" radius={.12}/>
+      <SoftBox size={[zone.width-.45,.018,.035]} position={[0,.155,-zone.depth/2+.25]} color={zone.category.color} emissive={zone.category.color} intensity={.35} radius={.009}/>
+      <Html position={[0,.25,zone.depth/2+.25]} center style={{pointerEvents:'none'}}><div style={{background:'#142630ed',border:`1px solid ${zone.category.color}66`,borderRadius:7,padding:'5px 10px',fontFamily:'inherit',textAlign:'center',width:'max-content',minWidth:90,maxWidth:180,color:'#d5e9ea',boxShadow:'0 4px 14px #0003'}}><strong style={{display:'block',fontSize:10,fontWeight:600,letterSpacing:'.04em',whiteSpace:'normal',overflowWrap:'break-word'}}>{zone.category.name}</strong><span style={{display:'block',fontSize:7,color:zone.category.color,marginTop:2}}>{zone.agents.length} {zone.agents.length===1?'agent':'agents'}</span></div></Html>
+      {!zone.agents.length&&<Plant position={[0,.15,.15]} size={.48}/>}
+    </group>
+    {zone.agents.map(agent=>{
+      const location=locations.get(agent.id)!,visit=interactions.find(item=>item.from_agent_id===agent.id),received=interactions.find(item=>item.to_agent_id===agent.id),destination=visit?locations.get(visit.to_agent_id):undefined
+      return <group key={agent.id} position={location.position}>
+        <SoftBox size={[2.98,.018,3.42]} position={[0,.009,0]} color={selected===agent.id?'#3d5660':hovered===agent.id?'#36505c':'#2c414b'} radius={.1}/>
+        <Desk accent={location.color} role={agentRole(agent)}/><Chair color={location.color}/>
+        <SoftBox size={[2.76,.015,.027]} position={[0,.034,1.62]} color={location.color} emissive={location.color} intensity={selected===agent.id ? .7 : .18} radius={.006}/>
+        <AgentActor agent={agent} location={location} destination={destination} interaction={visit} recipientInteraction={received} workload={workloads[agent.id]} selected={selected===agent.id} hovered={hovered===agent.id} reducedMotion={reducedMotion} labelScale={labelScale} onSelect={onSelect} onHover={onHover}/>
+        {agentSeed(agent.id)%4===0&&<Plant position={[-1.25,0,-1.0]} size={.46}/>}
+      </group>
+    })}
   </group>
 }
 
-function OperationsHub({ activeCount, reducedMotion }: { activeCount: number; reducedMotion: boolean }) {
+function RecordedReview({interaction,from,to,reducedMotion}:{interaction:WorldInteraction;from:AgentLocation;to:AgentLocation;reducedMotion:boolean}) {
+  const [visible,setVisible]=useState(()=>interactionPhase(interaction).active)
+  useEffect(()=>{setVisible(interactionPhase(interaction).active);const end=interaction.completed_at?Date.parse(interaction.completed_at):NaN;if(!Number.isFinite(end))return;const timer=setTimeout(()=>setVisible(false),Math.max(1,REPLAY_SECONDS*1000-(Date.now()-end)));return()=>clearTimeout(timer)},[interaction.id,interaction.completed_at])
+  const points=useMemo<Point[]>(()=>[[from.position[0],.19,from.position[2]+1.3],[(from.position[0]+to.position[0])/2,.23,Math.max(from.position[2],to.position[2])+1.5],[to.position[0]-1,.19,to.position[2]+.8]],[from,to])
+  if(!visible)return null
+  return <group><Cable points={points} color="#a5d4c0" radius={reducedMotion ? .012 : .019} emissive/></group>
+}
+
+function OperationsHub({ activeCount, reducedMotion, position = [-.15, .04, 1.28] }: { activeCount: number; reducedMotion: boolean; position?:Point }) {
   const ring = useRef<THREE.Group>(null)
   useFrame(({ clock }) => { if (ring.current && !reducedMotion) ring.current.rotation.y = clock.elapsedTime * .065 })
-  return <group position={[-.15, .04, 1.28]}>
+  return <group position={position}>
     <mesh position={[0, .07, 0]} castShadow receiveShadow><cylinderGeometry args={[1.78, 1.88, .19, 64]} /><meshStandardMaterial color="#2c3e48" roughness={.45} metalness={.35} /></mesh>
     <mesh position={[0, .172, 0]}><cylinderGeometry args={[1.55, 1.55, .026, 64]} /><meshStandardMaterial color="#304c54" roughness={.34} metalness={.27} /></mesh>
     {[1.72, 1.45].map((radius, i) => <mesh key={radius} position={[0, .184, 0]} rotation={[-Math.PI / 2, 0, 0]}><torusGeometry args={[radius, i === 0 ? .018 : .009, 6, 64]} /><meshStandardMaterial color="#68c6c2" emissive="#68c6c2" emissiveIntensity={i === 0 ? .65 : .2} /></mesh>)}
@@ -417,114 +500,55 @@ function OperationsHub({ activeCount, reducedMotion }: { activeCount: number; re
   </group>
 }
 
-function Architecture() {
+function Architecture({width,depth}:{width:number;depth:number}) {
   return <group>
-    <SoftBox size={[17.1, .43, 11.5]} position={[-.15, -.28, -.2]} color="#16252f" radius={.22} />
-    <SoftBox size={[16.83, .045, 11.23]} position={[-.15, -.035, -.2]} color="#1c2d37" radius={.2} />
-    <SoftBox size={[16.45, .026, .022]} position={[-.15, -.155, 5.557]} color="#6b9299" emissive="#527e88" intensity={.25} radius={.007} />
-    <SoftBox size={[.022, .026, 10.88]} position={[8.37, -.155, -.2]} color="#537e85" emissive="#527e88" intensity={.2} radius={.007} />
-    {[-7.7, 7.4].map(x => [-4.65, 4.24].map(z => <mesh key={`${x}-${z}`} position={[x, -.52, z]} castShadow><cylinderGeometry args={[.24, .18, .5, 12]} /><meshStandardMaterial color="#263741" roughness={.55} metalness={.4} /></mesh>))}
-    <SoftBox size={[16.75, .53, .18]} position={[-.15, .25, -5.72]} color="#344651" radius={.065} />
-    {[-7.94, -2.65, 2.63, 7.63].map(x => <SoftBox key={x} size={[.09, 1.93, .10]} position={[x, .95, -5.73]} color="#516570" radius={.025} />)}
-    {[-5.3, 0, 5.3].map(x => <group key={x}>
-      <mesh position={[x, 1.17, -5.74]}><boxGeometry args={[5.16, 1.34, .036]} /><meshStandardMaterial color="#47707b" transparent opacity={.12} roughness={.4} metalness={.18} depthWrite={false} /></mesh>
-      <SoftBox size={[5.19, .06, .09]} position={[x, 1.93, -5.73]} color="#5c7380" radius={.022} />
-    </group>)}
-    <SoftBox size={[16.5, .022, .034]} position={[-.15, .55, -5.61]} color="#5c9eaa" emissive="#5c9eaa" intensity={.25} radius={.006} />
-    <Plant position={[-7.9, .03, 4.3]} size={1.2} />
-    <Plant position={[7.5, .03, 4.2]} size={1.14} />
-    <SoftBox size={[.77, 1.85, .82]} position={[-7.62, .94, -4.75]} color="#2d414e" radius={.09} />
-    {[.34, .62, .9, 1.18, 1.46].map((y, i) => <group key={y}>
-      <SoftBox size={[.59, .1, .027]} position={[-7.62, y, -4.323]} color="#4a626e" radius={.025} />
-      <Ball position={[-7.83, y, -4.3]} radius={.02} color={i === 0 ? '#baafdc' : '#78b7a9'} emissive="#78b7a9" intensity={.3} />
-    </group>)}
-    <SoftBox size={[1.31, .055, .30]} position={[6.77, .81, -5.47]} color="#627680" radius={.045} />
-    <Plant position={[6.35, .86, -5.49]} size={.62} />
-    <SoftBox size={[.22, .29, .14]} position={[7.12, 1.02, -5.49]} color="#b7b9b8" radius={.025} />
-    <SoftBox size={[.14, .19, .014]} position={[7.12, 1.035, -5.409]} color="#718fa1" radius={.025} />
-    <Cable points={[[-3.34, .015, 2.5], [-2.65, .015, 2.5], [-2.1, .015, 1.55], [-1.89, .015, 1.28]]} color="#416d76" radius={.017} emissive />
-    <Cable points={[[-3.34, .015, -2.35], [-2.78, .015, -2.35], [-2.74, .015, -.05], [-1.71, .015, .39]]} color="#4d526f" radius={.017} emissive />
-    <Cable points={[[-.15, .015, -1.5], [-.15, .015, -.4], [-.15, .015, -.1]]} color="#416d76" radius={.017} emissive />
-    <Cable points={[[3.02, .015, -2.35], [2.42, .015, -2.35], [2.42, .015, .02], [1.43, .015, .43]]} color="#4d626b" radius={.017} emissive />
-    <Cable points={[[3.02, .015, 2.5], [2.28, .015, 2.5], [1.75, .015, 1.55], [1.56, .015, 1.28]]} color="#416d76" radius={.017} emissive />
+    <SoftBox size={[width,.43,depth]} position={[0,-.28,depth/2-.5]} color="#16252f" radius={.22}/>
+    <SoftBox size={[width-.25,.045,depth-.25]} position={[0,-.035,depth/2-.5]} color="#1c2d37" radius={.18}/>
+    <SoftBox size={[width-.6,.024,.032]} position={[0,-.15,depth-.54]} color="#608e95" emissive="#527e88" intensity={.3} radius={.008}/>
+    {[-1,1].map(side=><SoftBox key={side} size={[.022,.025,depth-.65]} position={[side*(width/2-.22),-.15,depth/2-.5]} color="#527e88" emissive="#527e88" intensity={.22} radius={.006}/>)}
+    <SoftBox size={[width-.25,.5,.17]} position={[0,.25,-1]} color="#344651" radius={.06}/>
+    {Array.from({length:Math.max(3,Math.round(width/5))},(_,i)=>{const count=Math.max(3,Math.round(width/5)),x=(i-(count-1)/2)*(width-.8)/count;return <group key={i} position={[x,0,-1]}><SoftBox size={[(width-.9)/count-.13,.06,.09]} position={[0,1.9,0]} color="#5c7380" radius={.02}/><SoftBox size={[.07,1.8,.08]} position={[-(width-.9)/count/2,.95,0]} color="#526975" radius={.02}/><mesh position={[0,1.2,-.02]}><boxGeometry args={[(width-.9)/count-.13,1.3,.035]}/><meshStandardMaterial color="#47707b" transparent opacity={.12} depthWrite={false} roughness={.4}/></mesh></group>})}
+    {[-1,1].map(side=><Plant key={side} position={[side*(width/2-.8),.03,depth-1.3]} size={1.0}/>)}
+    <FilingCabinet position={[-width/2+.6,.02,-.55]} accent="#8cbdb7"/>
   </group>
 }
 
-function Scene({ agents, selected, onSelect, reducedMotion, resetKey, active = true }: WorldProps) {
-  const controls = useRef<OrbitControlsImpl>(null)
-  const [hovered, setHovered] = useState<string | null>(null)
-  const { camera, size } = useThree()
-  const nameCounts = new Map<string, number>()
-  for (const agent of agents) { const name = agent.name || `${ROLE_NAME[agentRole(agent)]} agent`; nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1) }
-  const namedAgents = agents.map(agent => nameCounts.get(agent.name || `${ROLE_NAME[agentRole(agent)]} agent`)! > 1 ? { ...agent, tagId: agent.id.slice(-4) } : agent)
-  const primaryAgents = ZONES.map(zone => namedAgents.find(agent => normalizeRole(agent.role) === zone.role))
-  const primaryIds = new Set(primaryAgents.flatMap(agent => agent ? [agent.id] : []))
-  const extraAgents = namedAgents.filter(agent => !primaryIds.has(agent.id))
-  const annexRows = Math.ceil(extraAgents.length / 5)
-  const roomWidth = annexRows ? 21.5 : 17.1
-  const roomDepth = annexRows ? 12.25 + annexRows * 3.8 : 11.5
-  // Compare projected room bounds with the original five-station composition.
-  const roomScale = Math.max(1, (roomWidth * .83 + roomDepth * .558) / 20.61, ((roomWidth * .558 + roomDepth * .83) * .449 + 2.5) / 11.07)
-  const aspectScale = size.width > 0 && size.height > 0 ? Math.max(1, 1.6 / (size.width / size.height)) : 1
-  const fitScale = roomScale * aspectScale
-  // Near desks occupy more screen space in perspective, so bias toward the annex.
-  const centerZ = annexRows ? (.35 + annexRows * 3.8) / 2 + roomDepth * .12 : CAMERA_TARGET[2]
-  const cameraTarget = useMemo<Point>(() => [CAMERA_TARGET[0], CAMERA_TARGET[1], centerZ], [centerZ])
-  const labelScale = annexRows ? .85 / roomScale : 1
-  useCursor(hovered !== null)
-  useEffect(() => { if (!active) setHovered(null) }, [active])
-  useEffect(() => {
-    const orbit = controls.current
-    if (!orbit || !active || size.width <= 0 || size.height <= 0) return
-    // A portrait canvas needs more distance to retain the whole office width.
-    // Reset uses this fitted view; desktop composition stays exactly the same.
-    const damping = orbit.enableDamping
-    orbit.enableDamping = false
-    orbit.target.set(...cameraTarget)
-    camera.position.set(
-      cameraTarget[0] + (CAMERA_POSITION[0] - CAMERA_TARGET[0]) * fitScale,
-      cameraTarget[1] + (CAMERA_POSITION[1] - CAMERA_TARGET[1]) * fitScale,
-      cameraTarget[2] + (CAMERA_POSITION[2] - CAMERA_TARGET[2]) * fitScale,
-    )
-    if (camera instanceof THREE.PerspectiveCamera) { camera.far = Math.max(150, 20.37 * fitScale + 70); camera.updateProjectionMatrix() }
-    orbit.update()
-    orbit.enableDamping = damping
-    orbit.saveState()
-  }, [camera, cameraTarget, fitScale, resetKey, active, size.width, size.height])
-  useFrame(({ camera }) => {
-    const target = controls.current?.target
-    if (!target) return
-    const x = THREE.MathUtils.clamp(target.x, annexRows ? -9.3 : -2.8, annexRows ? 9.3 : 2.8)
-    const y = THREE.MathUtils.clamp(target.y, .05, 1.8)
-    const z = THREE.MathUtils.clamp(target.z, annexRows ? -4.4 : -2.8, annexRows ? 4.5 + annexRows * 3.8 : 2.8)
-    camera.position.x += x - target.x
-    camera.position.y += y - target.y
-    camera.position.z += z - target.z
-    target.set(x, y, z)
-  })
+function Scene({ agents, categories, workloads = {}, interactions = [], selected, onSelect, reducedMotion, resetKey, active = true }: WorldProps) {
+  const controls=useRef<OrbitControlsImpl>(null),[hovered,setHovered]=useState<string|null>(null)
+  const {camera,size}=useThree()
+  const namedAgents=useMemo(()=>{const counts=new Map<string,number>();for(const agent of agents){const name=agent.name||`${ROLE_NAME[agentRole(agent)]} agent`;counts.set(name,(counts.get(name)??0)+1)}return agents.map(agent=>counts.get(agent.name||`${ROLE_NAME[agentRole(agent)]} agent`)!>1?{...agent,tagId:agent.id.slice(-4)}:agent)},[agents])
+  const layout=useMemo(()=>categoryLayout(namedAgents,categories),[namedAgents,categories])
+  const {roomWidth,roomDepth}=layout
+  const realInteractions=useMemo(()=>{const used=new Set<string>();return [...interactions].sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||'')).filter(item=>{if(!item.id||item.from_agent_id===item.to_agent_id||!layout.locations.has(item.from_agent_id)||!layout.locations.has(item.to_agent_id)||!interactionPhase(item).active||used.has(item.from_agent_id))return false;used.add(item.from_agent_id);return true})},[interactions,layout.locations])
+  const roomScale=Math.max(1,(roomWidth*.83+roomDepth*.558)/20.61,((roomWidth*.558+roomDepth*.83)*.449+2.5)/11.07)
+  const aspectScale=size.width>0&&size.height>0?Math.max(1,1.6/(size.width/size.height)):1
+  const fitScale=roomScale*aspectScale,cameraTarget=useMemo<Point>(()=>[0,.35,roomDepth*.53],[roomDepth])
+  const labelScale=Math.max(.67,Math.min(1,1.15/roomScale))
+  useCursor(hovered!==null)
+  useEffect(()=>{if(!active)setHovered(null)},[active])
+  useEffect(()=>{
+    const orbit=controls.current;if(!orbit||!active||size.width<=0||size.height<=0)return
+    const damping=orbit.enableDamping;orbit.enableDamping=false;orbit.target.set(...cameraTarget)
+    camera.position.set(cameraTarget[0]+(CAMERA_POSITION[0]-CAMERA_TARGET[0])*fitScale,cameraTarget[1]+(CAMERA_POSITION[1]-CAMERA_TARGET[1])*fitScale,cameraTarget[2]+(CAMERA_POSITION[2]-CAMERA_TARGET[2])*fitScale)
+    if(camera instanceof THREE.PerspectiveCamera){camera.far=Math.max(150,20.37*fitScale+70);camera.updateProjectionMatrix()}
+    orbit.update();orbit.enableDamping=damping;orbit.saveState()
+  },[camera,cameraTarget,fitScale,resetKey,active,size.width,size.height])
+  useFrame(({camera})=>{const target=controls.current?.target;if(!target)return;const x=THREE.MathUtils.clamp(target.x,-roomWidth*.45,roomWidth*.45),y=THREE.MathUtils.clamp(target.y,.05,2.2),z=THREE.MathUtils.clamp(target.z,-.5,roomDepth+.5);camera.position.x+=x-target.x;camera.position.y+=y-target.y;camera.position.z+=z-target.z;target.set(x,y,z)})
   return <>
-    <fog attach="fog" args={['#0d141c', 38 * fitScale, 74 * fitScale]} />
-    <ambientLight intensity={.62} color="#bfccd3" />
-    <hemisphereLight args={['#b7d7e8', '#182733', 1.35]} />
-    <directionalLight position={[-7, 13, 9]} intensity={2.15} color="#e4eee8" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-left={-Math.max(12, roomWidth * .7)} shadow-camera-right={Math.max(12, roomWidth * .7)} shadow-camera-top={Math.max(10, roomDepth * .7)} shadow-camera-bottom={-Math.max(10, roomDepth * .7)} shadow-camera-near={.5} shadow-camera-far={Math.max(38, roomDepth + 25)} shadow-bias={-.0004} shadow-normalBias={.025} />
-    <directionalLight position={[7, 7, -7]} intensity={1.15} color="#8da8c7" />
-    <directionalLight position={[4, 3, 10]} intensity={.3} color="#a5c2bd" />
-    <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[180, 180]} /><shadowMaterial transparent opacity={.21} /></mesh>
-    <Architecture />
-    <TeamAnnex rows={annexRows} />
-    <OperationsHub activeCount={agents.filter(a => a.status === 'running').length} reducedMotion={reducedMotion} />
-    {ZONES.map((zone, index) => {
-      const agent = primaryAgents[index]
-      const highlighted = !!agent && (hovered === agent.id || selected === agent.id)
-      return <Station key={zone.role} zone={zone} agent={agent} selected={!!agent && selected === agent.id} hovered={!!agent && hovered === agent.id} reducedMotion={reducedMotion} compactLabels={aspectScale > 1 || agents.length > 10} labelScale={highlighted ? 1 : labelScale} onSelect={onSelect} onHover={setHovered} />
-    })}
-    {extraAgents.map((agent, index) => <AgentPod key={agent.id} agent={agent} index={index} selected={selected === agent.id} hovered={hovered === agent.id} reducedMotion={reducedMotion} labelScale={labelScale} onSelect={onSelect} onHover={setHovered} />)}
-    <OrbitControls ref={controls} makeDefault enabled={active} target={cameraTarget} enableDamping={!reducedMotion} dampingFactor={.07} minDistance={13} maxDistance={Math.max(60, 30 * fitScale)} minPolarAngle={.36} maxPolarAngle={1.18} minAzimuthAngle={-.85} maxAzimuthAngle={1.0} enablePan panSpeed={.35} rotateSpeed={.52} zoomSpeed={.62} />
+    <fog attach="fog" args={['#0d141c',38*fitScale,74*fitScale]}/>
+    <ambientLight intensity={.62} color="#bfccd3"/><hemisphereLight args={['#b7d7e8','#182733',1.35]}/>
+    <directionalLight position={[-7,16,12]} intensity={2.15} color="#e4eee8" castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-Math.max(12,roomWidth*.65)} shadow-camera-right={Math.max(12,roomWidth*.65)} shadow-camera-top={Math.max(10,roomDepth*.8)} shadow-camera-bottom={-Math.max(10,roomDepth*.8)} shadow-camera-far={Math.max(60,roomDepth+30)} shadow-bias={-.0004} shadow-normalBias={.025}/>
+    <directionalLight position={[7,7,-7]} intensity={1.15} color="#8da8c7"/><directionalLight position={[4,3,10]} intensity={.3} color="#a5c2bd"/>
+    <mesh position={[0,-1,roomDepth/2]} rotation={[-Math.PI/2,0,0]} receiveShadow><planeGeometry args={[180,180]}/><shadowMaterial transparent opacity={.21}/></mesh>
+    <Architecture width={roomWidth} depth={roomDepth}/><OperationsHub position={layout.hubPosition} activeCount={agents.filter(agent=>agent.status==='running'||(workloads[agent.id]?.running_jobs??0)>0).length} reducedMotion={reducedMotion}/>
+    {layout.zones.map(zone=><CategoryIsland key={zone.category.id} zone={zone} locations={layout.locations} selected={selected} hovered={hovered} workloads={workloads} interactions={realInteractions} reducedMotion={reducedMotion} labelScale={labelScale} onSelect={onSelect} onHover={setHovered}/>)}
+    {realInteractions.map(interaction=><RecordedReview key={interaction.id} interaction={interaction} from={layout.locations.get(interaction.from_agent_id)!} to={layout.locations.get(interaction.to_agent_id)!} reducedMotion={reducedMotion}/>)}
+    <OrbitControls ref={controls} makeDefault enabled={active} target={cameraTarget} enableDamping={!reducedMotion} dampingFactor={.07} minDistance={13} maxDistance={Math.max(90,30*fitScale)} minPolarAngle={.36} maxPolarAngle={1.18} minAzimuthAngle={-.85} maxAzimuthAngle={1.0} enablePan panSpeed={.35} rotateSpeed={.52} zoomSpeed={.62}/>
   </>
 }
 
 export default function World(props: WorldProps) {
-  return <Canvas shadows frameloop={props.active === false ? 'never' : props.reducedMotion ? 'demand' : 'always'} camera={{ position: CAMERA_POSITION, fov: 36, near: .1, far: 150 }} dpr={[1, 1.7]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }} style={{ width: '100%', height: '100%', touchAction: 'none' }} role="img" aria-label={`Interactive LocalOps office with ${props.agents.length} individual agent characters. Drag to orbit, scroll to zoom, or select any named agent.`}>
+  return <Canvas shadows frameloop={props.active === false ? 'never' : props.reducedMotion ? 'demand' : 'always'} camera={{ position: CAMERA_POSITION, fov: 36, near: .1, far: 150 }} dpr={[1, 1.7]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }} style={{ width: '100%', height: '100%', touchAction: 'none' }} role="region" aria-label={`Interactive LocalOps office with ${props.agents.length} individual agent characters grouped by category. Drag to orbit, scroll to zoom, or select any named agent. Warm colors and smoke visualize workload, not measured GPU temperature. Walks replay recorded collaboration events.`}>
     <Scene {...props} />
   </Canvas>
 }

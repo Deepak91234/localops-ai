@@ -1,0 +1,482 @@
+{
+  "observed_at": "2026-10-11T20:34:12.971656+00:00",
+  "scope": "Isolated localhost:8001 QA database read in SQLite mode=ro. No requests created, no production data mutated, no prompt/answer/snippet content copied.",
+  "source_count": 3,
+  "public_source_checks": [
+    {
+      "id": "c12563ba-f378-4c7d-9c1b-d6f65acab885",
+      "kind": "file",
+      "filename": "USER_GUIDE.md",
+      "status": "ready",
+      "credential_configured": false,
+      "source_bytes": 7314,
+      "stored_inside_isolated_upload_dir": true,
+      "is_expected_public_project_document": true,
+      "original_sha256": "96b72b4d547ed4dc0bc99d3086ac738c84c70ad23bf05f56c5491398d8c7ae65",
+      "matches_current_public_project_file": true
+    },
+    {
+      "id": "ba7341b5-04a4-48d8-bd21-d2c7b06c9e04",
+      "kind": "file",
+      "filename": "package.json",
+      "status": "ready",
+      "credential_configured": false,
+      "source_bytes": 558,
+      "stored_inside_isolated_upload_dir": true,
+      "is_expected_public_project_document": true,
+      "original_sha256": "0c2bc8a21da0a7fe13e3462a88950e5bc38ff9a2bf7e1c5630b230bc80bcc7e1",
+      "matches_current_public_project_file": true
+    },
+    {
+      "id": "de491bfd-3c82-49a4-a765-d48610ae42b0",
+      "kind": "api",
+      "filename": null,
+      "status": "ready",
+      "credential_configured": false,
+      "source_bytes": 5352,
+      "url": "https://api.github.com/repos/Deepak91234/localops-ai",
+      "expected_public_repository_endpoint": true,
+      "repository_private_flag": false,
+      "repository_full_name": "Deepak91234/localops-ai",
+      "public_repository_evidence": true
+    }
+  ],
+  "job_count": 13,
+  "job_status_counts": {
+    "completed": 13
+  },
+  "reported_tokens": 41469,
+  "jobs": [
+    {
+      "id": "b09a7bfd-ffe8-43d8-9464-3a31eac1bc5c",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3259,
+        "inference_latency_ms": 9914.57,
+        "queue_wait_ms": 4.75,
+        "processing_ms": 9915.93
+      }
+    },
+    {
+      "id": "c6d0aa32-1039-4586-8ced-bba26f1c12c8",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3136,
+        "inference_latency_ms": 7497.87,
+        "queue_wait_ms": 3.14,
+        "processing_ms": 7499.51
+      }
+    },
+    {
+      "id": "7c6f73ed-8567-4d12-8671-9f4d7e2b7db7",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3100,
+        "inference_latency_ms": 7128.84,
+        "queue_wait_ms": 7499.76,
+        "processing_ms": 7130.18
+      }
+    },
+    {
+      "id": "12c6be89-4b65-41b8-ad33-2cee601864ce",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 2843,
+        "inference_latency_ms": 2848.65,
+        "queue_wait_ms": 1685.26,
+        "processing_ms": 2849.99
+      }
+    },
+    {
+      "id": "95603164-c4b0-438d-bab8-5e11155e5c66",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3353,
+        "inference_latency_ms": 10992.7,
+        "queue_wait_ms": 3.86,
+        "processing_ms": 10994.12
+      }
+    },
+    {
+      "id": "aa1801ca-3c08-48a6-8574-ceb43fe99490",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3468,
+        "inference_latency_ms": 13507.42,
+        "queue_wait_ms": 10973.86,
+        "processing_ms": 13508.59
+      }
+    },
+    {
+      "id": "14f37c72-ebb0-430c-9abe-359443fcf37a",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3346,
+        "inference_latency_ms": 11991.1,
+        "queue_wait_ms": 6.25,
+        "processing_ms": 11992.22
+      }
+    },
+    {
+      "id": "20dd5225-2b6b-442b-8df4-060ffefc6eb0",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 2854,
+        "inference_latency_ms": 3239.84,
+        "queue_wait_ms": 11982.49,
+        "processing_ms": 3241.49
+      }
+    },
+    {
+      "id": "5768e3a0-c384-437d-9a24-c7957921f0b8",
+      "agent_id": "custom-ba7431cc",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 2872,
+        "inference_latency_ms": 3631.72,
+        "queue_wait_ms": 15227.66,
+        "processing_ms": 3633.28
+      }
+    },
+    {
+      "id": "993e712f-1891-49e5-889e-4e06e33c3c4f",
+      "agent_id": "custom-55b8728d",
+      "status": "completed",
+      "source_ids_count": 3,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3702,
+        "inference_latency_ms": 13267.97,
+        "queue_wait_ms": 2.85,
+        "processing_ms": 13284.9
+      }
+    },
+    {
+      "id": "fe3a08c3-8d01-4d62-a78e-f521bb165392",
+      "agent_id": "custom-55b8728d",
+      "status": "completed",
+      "source_ids_count": 3,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3459,
+        "inference_latency_ms": 5354.44,
+        "queue_wait_ms": 7216.35,
+        "processing_ms": 5356.43
+      }
+    },
+    {
+      "id": "06879e20-d987-4823-99ad-484a3d558a45",
+      "agent_id": "custom-55b8728d",
+      "status": "completed",
+      "source_ids_count": 3,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 3274,
+        "inference_latency_ms": 8460.79,
+        "queue_wait_ms": 12582.01,
+        "processing_ms": 8486.8
+      }
+    },
+    {
+      "id": "85ef4260-6002-47aa-96e5-8828b4453cc4",
+      "agent_id": "__assistant__",
+      "status": "completed",
+      "source_ids_count": 1,
+      "source_evidence_count": 6,
+      "selected_sources_only_public_qa_data": true,
+      "evidence_sources_within_selection": true,
+      "snippets_match_saved_source_text": true,
+      "model_citations_present": true,
+      "all_cited_ids_supplied": true,
+      "knowledge_found": true,
+      "synthetic": false,
+      "model": "nemotron3:33b",
+      "metrics": {
+        "tokens": 2803,
+        "inference_latency_ms": 9354.61,
+        "queue_wait_ms": 0.99,
+        "processing_ms": 9355.5
+      }
+    }
+  ],
+  "operations_advisor": {
+    "id": "custom-55b8728d",
+    "completed_jobs": 3,
+    "recorded_actual_heavy_queue": [
+      {
+        "observed_from_saved_timestamps": "2026-10-11T20:25:19.429554+00:00",
+        "running_job_id": "993e712f-1891-49e5-889e-4e06e33c3c4f",
+        "queued_job_ids": [
+          "fe3a08c3-8d01-4d62-a78e-f521bb165392",
+          "06879e20-d987-4823-99ad-484a3d558a45"
+        ],
+        "actual_queue_length": 2
+      }
+    ]
+  },
+  "security_blocks": [
+    {
+      "id": "d254694a-aced-4dbe-a609-5ccc3edcc79f",
+      "timestamp": "2026-10-11T20:29:59.987734+00:00",
+      "requested_agent": "finance",
+      "attempted_tool": "network.export",
+      "executed": false
+    }
+  ],
+  "recorded_reviews": [
+    {
+      "event_id": "75b76d3f-d474-44e4-922e-d3e57276b875",
+      "timestamp": "2026-10-11T20:15:43.623153+00:00",
+      "interaction_id": "43843e0b-4386-4dae-931b-290237f2290b",
+      "from_agent_id": "optimizer",
+      "to_agent_id": "finance",
+      "status": "completed",
+      "kind": "allocation_review",
+      "evidence_source_job_id": null,
+      "invoice_evidence_available": false,
+      "reviewed_finance_jobs": 0
+    },
+    {
+      "event_id": "ae2e9a66-7ca1-498a-a310-8506e6cffd0d",
+      "timestamp": "2026-10-11T20:30:20.577635+00:00",
+      "interaction_id": "97021d5e-b54c-4748-9faa-2639898b588e",
+      "from_agent_id": "optimizer",
+      "to_agent_id": "finance",
+      "status": "completed",
+      "kind": "allocation_review",
+      "evidence_source_job_id": null,
+      "invoice_evidence_available": false,
+      "reviewed_finance_jobs": 0
+    }
+  ],
+  "review_limit": "Saved workload review is deterministic and performs no inference; Finance has no completed invoice audit in this QA workspace, so invoice evidence is explicitly unavailable.",
+  "citation_contract": "result.sources is the evidence array; result.retrieval is a method string; there is no result.citations field.",
+  "assistant": {
+    "id": "85ef4260-6002-47aa-96e5-8828b4453cc4",
+    "status": "completed",
+    "selected_source_count": 1,
+    "selected_only_public_user_guide": true,
+    "answer_explains_undo_or_trash": true,
+    "cited_user_guide": true,
+    "metrics": {
+      "tokens": 2803,
+      "inference_latency_ms": 9354.61,
+      "queue_wait_ms": 0.99,
+      "processing_ms": 9355.5
+    }
+  },
+  "restoration": {
+    "operations_advisor": {
+      "same_id": "custom-55b8728d",
+      "deleted_at": null,
+      "restored_at": "2026-10-11T20:31:00.039455+00:00",
+      "status": "idle",
+      "enabled": true,
+      "category_id": "category-fdb611f9b7b9",
+      "completed_jobs_retained": 3
+    },
+    "app_configuration": {
+      "same_id": "ba7341b5-04a4-48d8-bd21-d2c7b06c9e04",
+      "deleted_at": null,
+      "restored_at": "2026-10-11T20:31:23.354246+00:00",
+      "status": "ready",
+      "shared": false,
+      "assigned_agent_ids": []
+    },
+    "events": [
+      {
+        "id": "10990283-b84a-4122-9383-099c2d3e609b",
+        "type": "agent_deleted",
+        "agent_id": "custom-ba7431cc",
+        "source_id": null,
+        "timestamp": "2026-10-11T20:20:08.284544+00:00"
+      },
+      {
+        "id": "04ac141d-1e58-4b68-9126-ba6a6d8d62f3",
+        "type": "agent_restored",
+        "agent_id": "custom-ba7431cc",
+        "source_id": null,
+        "timestamp": "2026-10-11T20:20:12.175978+00:00"
+      },
+      {
+        "id": "38d76938-5a74-4fc4-9e26-6a9b06013b32",
+        "type": "source_deleted",
+        "agent_id": null,
+        "source_id": "c12563ba-f378-4c7d-9c1b-d6f65acab885",
+        "timestamp": "2026-10-11T20:20:16.993819+00:00"
+      },
+      {
+        "id": "08364bbc-71fd-4a4a-bf8d-ff254ae8efd0",
+        "type": "source_restored",
+        "agent_id": null,
+        "source_id": "c12563ba-f378-4c7d-9c1b-d6f65acab885",
+        "timestamp": "2026-10-11T20:20:21.907102+00:00"
+      },
+      {
+        "id": "221039eb-bf0c-4e97-998e-b4b78b2acb46",
+        "type": "agent_deleted",
+        "agent_id": "custom-55b8728d",
+        "source_id": null,
+        "timestamp": "2026-10-11T20:30:50.411163+00:00"
+      },
+      {
+        "id": "41ed2ce7-09d6-44ca-95d5-a263924c4ebc",
+        "type": "agent_restored",
+        "agent_id": "custom-55b8728d",
+        "source_id": null,
+        "timestamp": "2026-10-11T20:31:00.041769+00:00"
+      },
+      {
+        "id": "7d3a82a4-f12a-4a20-b952-eef916823ed1",
+        "type": "source_deleted",
+        "agent_id": null,
+        "source_id": "ba7341b5-04a4-48d8-bd21-d2c7b06c9e04",
+        "timestamp": "2026-10-11T20:31:08.620657+00:00"
+      },
+      {
+        "id": "cc1c780b-826d-4ee1-b56d-0de30249755b",
+        "type": "source_restored",
+        "agent_id": null,
+        "source_id": "ba7341b5-04a4-48d8-bd21-d2c7b06c9e04",
+        "timestamp": "2026-10-11T20:31:23.355867+00:00"
+      }
+    ]
+  },
+  "checks": {
+    "completed_jobs": true,
+    "agent_jobs": 12,
+    "assistant_jobs": 1,
+    "all_jobs_actual_nemotron": true,
+    "all_jobs_evidence_and_citations_valid": true,
+    "restored_source_private_unassigned": true,
+    "restored_operations_same_id_and_history": true
+  },
+  "current_production_build": {
+    "entry": "index-Dl1BbW-y.js",
+    "world": "World-CYrCSV9J.js",
+    "css": "index-BShNt3vY.css",
+    "root_reported_browser_qa": "Category creation/movement, exact-ID bodies, real heavy work, recorded review, deletion/restore, compact assistant, 390px mobile passed."
+  }
+}
