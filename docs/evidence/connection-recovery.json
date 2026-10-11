@@ -1,0 +1,156 @@
+{
+  "tested_at": "2026-10-11T04:01:58Z",
+  "unit": "localops-ai.service",
+  "previous_pid": 353710,
+  "recovered_pid": 355203,
+  "recovered_seconds": 2.43,
+  "restart_policy": "on-failure",
+  "jobs_active_before_test": false,
+  "health": {
+    "status": "ok",
+    "service": "LocalOps AI",
+    "local_inference": {
+      "available": true,
+      "model": "nemotron3:33b",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "local_only": true,
+      "error": null,
+      "installed_models": [
+        "gemma4:26b",
+        "nemotron-3-super:latest",
+        "nemotron3:33b",
+        "qwen3.6:35b"
+      ]
+    },
+    "scheduler_policy": "priority",
+    "synthetic_data": true
+  },
+  "agent_creation_ui": "Connection check created",
+  "new_task": {
+    "id": "bc7df8c7-8ce0-4baa-82af-66b97bc83b40",
+    "agent_id": "hr-558571e6",
+    "type": "hr",
+    "prompt": "How many days of PTO do full-time employees receive?",
+    "priority": "standard",
+    "status": "completed",
+    "created_at": "2026-10-11T04:01:28.797621+00:00",
+    "started_at": "2026-10-11T04:01:28.800516+00:00",
+    "completed_at": "2026-10-11T04:01:36.207534+00:00",
+    "result": {
+      "answer": "Full-time employees receive 20 days of paid time off (PTO) per calendar year. [1]",
+      "model": "nemotron3:33b",
+      "inference_latency_ms": 7405.26,
+      "inference_wait_ms": 0.01,
+      "usage": {
+        "prompt_tokens": 480,
+        "completion_tokens": 25,
+        "total_tokens": 505
+      },
+      "source": "local_nemotron",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "finish_reason": "stop",
+      "sources": [
+        {
+          "id": "1",
+          "document": "handbook.txt",
+          "page": 1,
+          "snippet": "PAID TIME OFF\nFull-time employees receive 20 days of paid time off (PTO) per calendar year. Part-time employees receive PTO proportionally to their scheduled hours. New hires accrue PTO monthly from their first day. Requests for more than five consecutive days should be submitted at least two weeks in advance.",
+          "synthetic": true
+        },
+        {
+          "id": "2",
+          "document": "handbook.txt",
+          "page": 2,
+          "snippet": "REMOTE WORK\nEmployees may work remotely up to three days each week with their manager's agreement. Client records must stay on approved company devices. Do not send client files to personal email addresses or public file-sharing services.",
+          "synthetic": true
+        },
+        {
+          "id": "3",
+          "document": "handbook.txt",
+          "page": 3,
+          "snippet": "EXPENSES AND SUPPORT\nApproved business expenses should be submitted within 30 days with a receipt. Reimbursements over $250 require manager approval. Urgent support requests concern access outages; standard support requests are reviewed within one business day.",
+          "synthetic": true
+        }
+      ],
+      "retrieval": "local SQLite FTS5",
+      "synthetic": true,
+      "tool": "read_policy"
+    },
+    "error": null,
+    "metrics": {
+      "queue_wait_ms": 2.9,
+      "inference_latency_ms": 7405.26,
+      "inference_wait_ms": 0.01,
+      "tokens": 505,
+      "prompt_tokens": 480,
+      "completion_tokens": 25,
+      "model": "nemotron3:33b",
+      "processing_ms": 7406.04
+    }
+  },
+  "final_service_pid": 355913,
+  "browser_recovery": {
+    "offline_header": "Local service offline",
+    "creation_disabled_while_offline": true,
+    "reconnect_while_offline": "error remains visible",
+    "restored_header": "Local inference connected",
+    "connection_error_cleared": true,
+    "new_agent": "Recovery check",
+    "new_task": {
+      "id": "3824cf0f-01a3-4e36-8f13-97767e8f9eb5",
+      "agent_id": "hr-2da7d280",
+      "type": "hr",
+      "prompt": "What is the remote work policy?",
+      "priority": "standard",
+      "status": "completed",
+      "created_at": "2026-10-11T04:04:12.204518+00:00",
+      "started_at": "2026-10-11T04:04:12.211849+00:00",
+      "completed_at": "2026-10-11T04:04:13.595218+00:00",
+      "result": {
+        "answer": "The remote work policy allows employees to work remotely up to three days each week, provided they have their manager\u2019s agreement and keep client records on approved company devices; client files must not be sent to personal email addresses or public file\u2011sharing services. [1]",
+        "model": "nemotron3:33b",
+        "inference_latency_ms": 1378.63,
+        "inference_wait_ms": 0.01,
+        "usage": {
+          "prompt_tokens": 290,
+          "completion_tokens": 55,
+          "total_tokens": 345
+        },
+        "source": "local_nemotron",
+        "base_url": "http://127.0.0.1:11434/v1",
+        "finish_reason": "stop",
+        "sources": [
+          {
+            "id": "1",
+            "document": "handbook.txt",
+            "page": 2,
+            "snippet": "REMOTE WORK\nEmployees may work remotely up to three days each week with their manager's agreement. Client records must stay on approved company devices. Do not send client files to personal email addresses or public file-sharing services.",
+            "synthetic": true
+          }
+        ],
+        "retrieval": "local SQLite FTS5",
+        "synthetic": true,
+        "tool": "read_policy"
+      },
+      "error": null,
+      "metrics": {
+        "queue_wait_ms": 7.33,
+        "inference_latency_ms": 1378.63,
+        "inference_wait_ms": 0.01,
+        "tokens": 345,
+        "prompt_tokens": 290,
+        "completion_tokens": 55,
+        "model": "nemotron3:33b",
+        "processing_ms": 1379.84
+      }
+    },
+    "screenshot": "connection-fixed.jpg"
+  },
+  "service_controller": {
+    "stop": "passed",
+    "start": "passed",
+    "status": "passed",
+    "idempotent_start": "passed",
+    "foreign_project_guard": "passed"
+  }
+}

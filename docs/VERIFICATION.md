@@ -46,3 +46,11 @@ SSE recorded queued/running/completed events for real jobs; these drive characte
 - The durable history retains the initial rejected Finance narrative from testing. The validator was revised and repeated real Finance jobs passed afterward. No failure history was silently deleted.
 - WAN-disconnected acceptance remains **not tested**. Follow [OFFLINE_TEST.md](OFFLINE_TEST.md) on the GX10 after caching dependencies and model weights.
 - Multiuser authentication, external connectors, enterprise compliance and process sandboxing remain outside the hackathon MVP. Tools cannot execute arbitrary code or external actions.
+
+## Connection lifecycle fix (October 10 follow-up)
+
+The browser remained loaded after its terminal-owned backend process had stopped, causing every action to fail to fetch. The running app now uses an independent, loopback-only systemd user service with automatic restart on failure. `scripts/service.sh` provides start, stop, restart, status and logs; it refuses to mutate a unit owned by another project. This transient service lasts within the current user session; it does not enable reboot startup.
+
+Observed crash recovery took **2.43 seconds** while no jobs were active. A controlled stop/start verified the UI shows Local service offline, disables new submissions, and clears its connection error after recovery. New agent creation and a real local Nemotron task passed after reconnecting. The new task answered the remote-work policy with a handbook page 2 citation in **1,378.6 ms**. Network failures never automatically retry a POST; validation errors retain their details. Strict TypeScript/production build and six mocked fetch behavior cases passed.
+
+[Recovery evidence](evidence/connection-recovery.json) · [Successful new task](evidence/connection-fixed.jpg) · [Observed offline state](evidence/service-offline.jpg).

@@ -10,10 +10,19 @@ From this project directory:
 
 ```bash
 ./scripts/bootstrap.sh
-./scripts/start.sh
+./scripts/service.sh start
 ```
 
-Open **http://127.0.0.1:8000** in the GX10 browser. The API serves the built frontend from the same origin. Startup after setup is one command: `./scripts/start.sh`. Services bind to loopback; stop with Ctrl+C.
+Open **http://127.0.0.1:8000** in the GX10 browser. The API serves the built frontend from the same origin. Startup after setup is one command: `./scripts/service.sh start`. It returns after the API is ready and leaves the application running when this chat or terminal closes. The transient systemd user service lasts for the current user session; it is not enabled automatically after reboot. Services bind to loopback.
+
+```bash
+./scripts/service.sh status
+./scripts/service.sh logs
+./scripts/service.sh restart
+./scripts/service.sh stop
+```
+
+Starting an already running service is safe and does not restart it. The script verifies the unit's project directory before managing it. Restart after changing `.env` or rebuilding the app. For foreground use, stop the service first, then run `./scripts/start.sh`; keep that terminal open and stop with Ctrl+C. Do not run both on port 8000 at once.
 
 Before presenting, warm the actual local model:
 
@@ -39,7 +48,7 @@ Edit the plain values in `.env`; existing shell environment values take preceden
 ./scripts/start.sh --dev
 ```
 
-Development frontend: http://127.0.0.1:5173, with `/api` proxied to http://127.0.0.1:8000. API reference: http://127.0.0.1:8000/docs. Stop the development script to stop both project processes.
+Stop the production service before development startup. Development frontend: http://127.0.0.1:5173, with `/api` proxied to http://127.0.0.1:8000. API reference: http://127.0.0.1:8000/docs. Stop the development script to stop both project processes.
 
 ## Try the complete workflow
 

@@ -5,12 +5,13 @@ Use only the bundled fictional Cedar & Coast records. Presenter opening: **“Ru
 ## Before judges arrive
 
 ```bash
-./scripts/start.sh
-# In a second terminal, from the project directory:
+./scripts/service.sh start
 .venv/bin/python scripts/prewarm.py
 ```
 
-Open http://127.0.0.1:8000. Confirm the local connection indicator names `nemotron3:33b`. Keep the prewarm JSON available as real endpoint evidence. A cold request previously took 57.714 seconds; leave time for loading before the judged three minutes. Use a browser on the GX10; no LAN binding is required.
+Open http://127.0.0.1:8000. Confirm the local connection indicator names `nemotron3:33b`. The service stays running after the terminal or chat closes for the current user session; it does not enable startup after reboot. Check it with `./scripts/service.sh status` and inspect failures with `./scripts/service.sh logs`. Foreground `./scripts/start.sh` is also available when its terminal stays open; stop the service first to free port 8000.
+
+Keep the prewarm JSON available as real endpoint evidence. A cold request previously took 57.714 seconds; leave time for loading before the judged three minutes. Use a browser on the GX10; no LAN binding is required.
 
 ## Presentation sequence
 
@@ -30,7 +31,8 @@ The optimizer's **Explain with local Nemotron** button is an optional extra real
 - **Cold model:** wait for the real request or prewarm again. Do not substitute a canned answer. Show the loading state, local endpoint evidence, and deterministic invoice source while loading.
 - **Inference error:** inspect `/api/health`, run `scripts/prewarm.py`, and check the installed model with `curl http://127.0.0.1:11434/v1/models`. Existing errors remain inspectable in history. Do not claim the failed job completed.
 - **WebGL unavailable:** use **2D list view**; all backend workflows and HTML results remain available. This is an accessibility fallback; judged 3D acceptance still needs a WebGL-capable browser.
-- **Port occupied:** stop the earlier LocalOps process with Ctrl+C in its terminal. Do not kill an unrelated process or expose a new network port.
+- **App connection lost:** run `./scripts/service.sh status`, then `./scripts/service.sh start`. An already running owned service is reused without a restart. If it remains unavailable, inspect `./scripts/service.sh logs`.
+- **Port occupied:** use `./scripts/service.sh stop` for the owned LocalOps service, or Ctrl+C in the terminal of an earlier foreground instance. Do not kill an unrelated process or expose a new network port.
 - **Offline question:** say “Inference and data are local; a full WAN-disconnected test is [verified with recorded evidence / not yet observed].” Only choose the first statement after completing [OFFLINE_TEST.md](OFFLINE_TEST.md).
 
 Optional final action: create a named HR agent with `read_policy` and `handbook.txt` to show constrained configuration. Only allowlisted role/source/tool combinations are accepted.
