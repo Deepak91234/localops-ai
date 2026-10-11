@@ -2,13 +2,14 @@ import asyncio
 from datetime import datetime
 import time
 from ..models import utc_now
+from ..knowledge import ASSISTANT_ID
 from ..security import PermissionDenied
 from ..tools.workflows import run_workflow
 
 
 def select_next(jobs, policy, agents=None):
-    disabled = {agent["id"] for agent in (agents or []) if not agent.get("enabled", True)}
-    queued = [j for j in jobs if j["status"] == "queued" and j["agent_id"] not in disabled] if agents is not None else [j for j in jobs if j["status"] == "queued"]
+    eligible = {agent["id"] for agent in (agents or []) if agent.get("enabled", True) and not agent.get("deleted_at")}
+    queued = [j for j in jobs if j["status"] == "queued" and j["agent_id"] in eligible] if agents is not None else [j for j in jobs if j["status"] == "queued"]
     if policy == "priority":
         # Existing running tasks always complete; urgent jobs only reorder the pending queue.
         queued.sort(key=lambda j: (0 if j["priority"] == "urgent" else 1, j["created_at"]))
@@ -18,8 +19,9 @@ def select_next(jobs, policy, agents=None):
 
 
 class Scheduler:
-    def __init__(self, store, events, settings, llm):
+    def __init__(self, store, events, settings, llm, knowledge=None):
         self.store, self.events, self.settings, self.llm = store, events, settings, llm
+        self.knowledge = knowledge
         self.wake = asyncio.Event()
         self.task = None
 
@@ -29,7 +31,7 @@ class Scheduler:
 
     async def start(self):
         self.store.recover_interrupted_jobs()
-        for agent in self.store.all("agents"):
+        for agent in self.store.active("agents"):
             if not agent.get("enabled", True):
                 agent.update(status="paused", pause_pending=False)
                 self.store.put("agents", agent)
@@ -50,6 +52,8 @@ class Scheduler:
 
     async def agent_state(self, agent_id, status):
         agent = self.store.get("agents", agent_id)
+        if agent is None or agent.get("deleted_at"):
+            return
         if not agent.get("enabled", True) and status != "running":
             status = "paused"
             agent["pause_pending"] = False
@@ -59,7 +63,7 @@ class Scheduler:
         agent["status"] = status
         agent["last_activity_at"] = utc_now()
         self.store.put("agents", agent)
-        await self.events.publish("agents_updated", self.store.all("agents"))
+        await self.events.publish("agents_updated", [a for a in self.store.active("agents") if a["id"] != ASSISTANT_ID])
 
     async def _worker(self):
         while True:
@@ -77,7 +81,7 @@ class Scheduler:
             await self.events.activity(f"{job['type'].title()} job started · {job['priority']} priority", job["agent_id"], job["id"])
             started = time.perf_counter()
             try:
-                result = await run_workflow(self.store.get("agents", job["agent_id"]), job, self.settings, self.llm)
+                result = await run_workflow(self.store.get("agents", job["agent_id"]), job, self.settings, self.llm, self.knowledge)
                 job.update(status="completed", result=result)
                 usage = result.get("usage", {})
                 job["metrics"].update(inference_latency_ms=result.get("inference_latency_ms"), inference_wait_ms=result.get("inference_wait_ms"), tokens=usage.get("total_tokens"), prompt_tokens=usage.get("prompt_tokens"), completion_tokens=usage.get("completion_tokens"), model=result.get("model"))

@@ -1,9 +1,13 @@
 import asyncio
 import time
+import json
+from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 from app.config import Settings
 from app.main import create_app
+from app.tools.finance import analyze_invoices
+from conftest import FIXTURES, attach_fixtures
 
 
 class TestLLM:
@@ -18,14 +22,16 @@ class TestLLM:
 
     async def structured_output(self, system, prompt):
         result = await self.chat(system, prompt)
-        result["structured"] = {"summary": "Review duplicate records before acting. Prioritize overdue unpaid invoices for review.", "duplicate_invoice_ids": ["INV-1001"], "overdue_total": "4950.50", "deduplicated_overdue_total": "3750.50"}
+        evidence = json.loads(prompt.split("Exact audited evidence: ")[1].split("\nReturn this JSON schema:")[0])
+        result["structured"] = {"summary": "Review duplicate records before acting. Prioritize overdue unpaid invoices for review.", "duplicate_invoice_ids": evidence["duplicate_invoice_ids"], "overdue_total": evidence["calculations"]["overdue_total"], "deduplicated_overdue_total": evidence["calculations"]["deduplicated_overdue_total"]}
         return result
 
 
 @pytest.fixture
 def client(tmp_path):
-    settings = Settings(db_path=tmp_path / "test.db")
+    settings = Settings(db_path=tmp_path / "test.db", upload_dir=tmp_path / "uploads")
     with TestClient(create_app(settings, TestLLM()), base_url="http://localhost") as client:
+        attach_fixtures(client)
         yield client
 
 
@@ -56,12 +62,13 @@ def test_finance_returns_inspectable_deterministic_results(client):
     response = client.post("/api/jobs", json={"agent_id": "finance", "prompt": "Find duplicate and overdue invoices"})
     job = wait_job(client, response.json()["id"])
     assert job["status"] == "completed"
-    assert job["result"]["calculations"]["overdue_total"] == "4950.50"
+    assert job["result"]["calculations"]["overdue_total"] == analyze_invoices(FIXTURES / "invoices.csv", date.today())["calculations"]["overdue_total"]
     assert len(job["result"]["rows"]) == 8
 
 
 def test_agent_studio_creation_and_privilege_refusal(client):
-    config = {"name": "Demo HR", "role": "hr", "purpose": "Answer fictional handbook questions", "tools": ["read_policy"], "source": "handbook.txt"}
+    source_id = client.get("/api/sources").json()[0]["id"]
+    config = {"name": "Demo HR", "role": "hr", "purpose": "Answer attached handbook questions", "tools": ["read_policy"], "source_ids": [source_id]}
     assert client.post("/api/agents", json=config).status_code == 201
     config["tools"] = ["analyze_invoices"]
     assert client.post("/api/agents", json=config).status_code == 403

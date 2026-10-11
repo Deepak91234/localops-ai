@@ -31,8 +31,8 @@ def test_validated_agent_cannot_escalate_role_or_change_source():
         validate_configuration(AgentCreate(name="Demo", role="hr", purpose="Read policy safely", tools=["read_policy"], source="invoices.csv"))
     with pytest.raises(ValidationError):
         AgentCreate(name="Demo", role="hr", purpose="Read policy safely", tools=["network.export"], source="handbook.txt")
-    with pytest.raises(ValidationError):
-        AgentCreate(name="Demo", role="hr", purpose="Read policy safely", tools=["read_policy"], source="../../etc/passwd")
+    with pytest.raises(PermissionDenied):
+        validate_configuration(AgentCreate(name="Demo", role="hr", purpose="Read policy safely", tools=["read_policy"], source="../../etc/passwd"))
 
 
 def test_allowed_tool_cannot_accept_generated_path_or_code():

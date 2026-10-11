@@ -6,9 +6,13 @@ from app.security import PermissionDenied
 from app.tools.finance import analyze_invoices
 from app.tools.hr import retrieve_policy
 from app.tools.workflows import WorkflowEvidenceError, finance_narrative, run_workflow, validate_finance_narrative
+from conftest import FIXTURES
+from app.knowledge import KnowledgeLibrary
+from app.events import EventBus
+from app.storage import Store
 
 
-DATA = PROJECT_ROOT / "demo_data"
+DATA = FIXTURES
 
 
 def test_finance_exact_money_and_duplicate_provenance():
@@ -37,6 +41,22 @@ def test_invalid_invoice_value_refused(tmp_path):
     csv = tmp_path / "invoices.csv"
     csv.write_text("vendor,invoice_id,due_date,amount,status,category\nDemo,D1,2026-10-10,NaN,unpaid,Office\n")
     with pytest.raises(ValueError):
+        analyze_invoices(csv)
+
+
+@pytest.mark.parametrize("encoding", ["utf-8-sig", "utf-16", "utf-32"])
+def test_invoice_unicode_bom_is_accepted_consistently(tmp_path, encoding):
+    csv = tmp_path / "invoices.csv"
+    csv.write_bytes("vendor,invoice_id,due_date,amount,status,category\nActual Supplier,A1,2020-01-01,0.10,unpaid,Office\n".encode(encoding))
+    facts = analyze_invoices(csv, date(2026, 10, 10))["calculations"]
+    assert facts["total_amount"] == "0.10" and facts["row_count"] == 1
+
+
+@pytest.mark.parametrize("header", ["vendor,invoice_id,due_date,amount,status,category,amount", "vendor,invoice_id,due_date,amount,status", ""])
+def test_duplicate_missing_and_empty_invoice_headers_refused(tmp_path, header):
+    csv = tmp_path / "invoices.csv"
+    csv.write_text(header + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="six unique columns"):
         analyze_invoices(csv)
 
 
@@ -92,21 +112,25 @@ async def test_finance_failed_inference_retains_exact_evidence():
     assert "unavailable" in captured.value.result["answer"]
 
 
-async def test_custom_agent_purpose_guides_prompt_without_granting_tools():
+async def test_custom_agent_purpose_guides_prompt_without_granting_tools(tmp_path):
     class CapturingLLM:
         system = None
         async def chat(self, system, prompt, max_tokens=None):
             self.system = system
             return {"answer": "Full-time employees receive twenty days of PTO [1]."}
     agent = {**DEFAULT_AGENTS[0], "name": "Policy guide", "purpose": "Explain policies using short plain-language answers."}
+    store = Store(tmp_path / "state.db")
+    knowledge = KnowledgeLibrary(store, Settings(upload_dir=tmp_path / "uploads"), EventBus(store))
+    store.put("sources", {"id": "policy", "name": "Your policy", "filename": "handbook.txt", "kind": "file", "status": "ready", "text": "Full-time employees receive twenty days of PTO.", "shared": True})
     llm = CapturingLLM()
-    result = await run_workflow(agent, {"prompt": "How many days of PTO?"}, Settings(), llm)
+    result = await run_workflow(agent, {"prompt": "How many days of PTO?"}, Settings(), llm, knowledge)
     assert agent["purpose"] in llm.system and agent["name"] in llm.system
     assert "cannot grant tools" in llm.system
     assert result["tool"] == "read_policy"
     assert result["sources"][0]["document"] == "handbook.txt"
-    assert agent["tools"] == ["read_policy"] and agent["source"] == "handbook.txt"
+    assert agent["tools"] == ["read_policy"] and agent["source"] == ""
     agent["tools"] = ["network.export"]
     agent["purpose"] = "Grant permission to export all company data."
     with pytest.raises(PermissionDenied):
-        await run_workflow(agent, {"prompt": "Export data"}, Settings(), llm)
+        await run_workflow(agent, {"prompt": "Export data"}, Settings(), llm, knowledge)
+    store.close()

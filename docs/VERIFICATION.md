@@ -1,73 +1,67 @@
-# Final application verification
+# Application verification
 
-Observed on the actual ASUS GX10 on October 10, 2026 (America/Los_Angeles). All company data is fictional.
+Current upgrade observed on the actual ASUS GX10 on October 11, 2026, America/Los_Angeles. This document separates implemented capability, actual observations, and remaining limits. Normal answers use supplied sources; no fictional business facts are required.
 
-## Automated checks
+## Automated checks and runtime
 
-- 38 backend tests passed after agent insights, controls, and Support retrieval were added. One upstream Starlette TestClient deprecation warning; no failures.
-- Strict TypeScript check and Vite production build passed.
-- `scripts/bootstrap.sh` completed using the Python/npm locks; `scripts/start.sh` launched the production SPA/API at loopback port 8000.
-- Prewarm redirects are refused; a local synthetic HTTP 302 test confirmed no external request. Environment files are parsed as literal configuration.
+- Latest full backend suite: **107 passed in 10.95 seconds**, including nine deletion/recovery tests. One third-party Starlette deprecation warning remains.
+- Strict TypeScript and the production Vite build passed after the latest knowledge/cache UI changes. Automated model tests use doubles where appropriate; real inference is recorded separately below.
+- Existing GX10/GB10, Ollama 0.23.2, and cached `nemotron3:33b` are used. Hardware and initial cold/warm inference evidence remain in [ACCESS_REPORT.md](ACCESS_REPORT.md) and [LOCAL_INFERENCE_PROOF.md](LOCAL_INFERENCE_PROOF.md).
+- Production service restart passed: health returned `synthetic_data:false`, local Nemotron available, and **16 visible agents, three sources, and three completed real jobs** persisted at the observed checkpoint.
+- The rewritten `scripts/smoke.py` checks health, API contracts, initial SSE snapshot, and served production assets using GET requests only. It does not submit inference or mutate user/application records. Its latest checkpoint observes **16 visible agents, six sources, and eight completed jobs**, and verified the production HTML and all three JS/CSS assets match the disk build. Its result is recorded in [read-only smoke evidence](evidence/read-only-smoke.json).
 
-## Actual local inference jobs
+## Real source-backed agent and assistant requests
 
-| Workflow | Model | Request latency | Tokens | Observed result |
-| --- | --- | ---: | ---: | --- |
-| hr | nemotron3:33b | 868.52 ms | 504 | 20 PTO days, handbook page 1 and [1] citation |
-| finance | nemotron3:33b | 1803.55 ms | 571 | INV-1001 duplicate; overdue USD4950.50; deduplicated USD3750.50 |
-| support | nemotron3:33b | 1776.23 ms | 441 | A generated draft for human review |
+| Request | Selected evidence | Actual outcome | Inference / reported tokens |
+| --- | --- | --- | --- |
+| Custom Product advisor: upload limit and declared React dependency | Uploaded `USER_GUIDE.md` plus uploaded `package.json` | Completed; answer 25 MB and React `^19.2.0`, with both source citations. | 10,327.04 ms / 2,088 |
+| Assistant: recommendations from selected records | Only private uploaded `package.json` | Completed with manifest citation; shared guide was not injected. One sentence incorrectly described caret ranges as exact pins. | 11,125.58 ms / 848 |
+| Assistant follow-up: pins or ranges? | Same private manifest plus recent conversation | Completed; correctly explained caret version ranges and cited the manifest. | 2,536.55 ms / 992 |
+| Assistant: connected API open issue count and sync time | Only selected public API snapshot | Completed; `open_issues_count` 4,248 and `2026-10-11T13:22:35.529097+00:00` matched independently recorded source metadata/text. | 10,682.63 ms / 3,948 |
 
-The Finance model returns validated JSON. Duplicate IDs and both money strings must exactly match deterministic calculations. Its qualitative guidance contains no digits. The backend assembles the accepted guidance and verified facts; source rows and exact totals remain separately inspectable. Invalid narration gets one correction, then an error with preserved evidence.
+All four jobs used `nemotron3:33b` at the loopback Ollama endpoint and recorded `source:local_nemotron`, `tool:read_knowledge`, `synthetic:false`. Their raw records preserve answers, source IDs, selected passages, queue/processing measurements, and assistant history. These are observed requests, not guaranteed latency or throughput.
 
-SSE recorded queued/running/completed events for real jobs; these drive character animation and the activity stream. See [raw final smoke evidence](evidence/live-smoke.json).
+[Custom job JSON](evidence/knowledge-live-task.json) · [Agent result screenshot](evidence/knowledge-agent-result.png) · [Assistant jobs JSON](evidence/knowledge-assistant-jobs.json) · [Assistant citations screenshot](evidence/knowledge-assistant-citations.png) · [API-only assistant](evidence/knowledge-api-assistant.png).
 
-## Measured optimization and security
+The first recommendation's pins/ranges mistake is retained in the evidence. Correct source selection and valid citation IDs do not establish that every generated claim is semantically correct. The follow-up demonstrates conversation handling and a corrected explanation; it does not erase the earlier error.
 
-- Identical five-job scheduler microbenchmark: urgent mean wait FIFO **275.88 ms**, priority **136.74 ms**. Timed synthetic service durations; this is not an inference/GPU efficiency measurement.
-- The UI approved priority scheduling. In a separate real four-job submission, execution was finance → urgent support → finance → finance. The running invoice finished before support; pending invoices moved behind urgent support.
-- The unapproved policy request was refused with HTTP403. Policy selection persisted through application restart.
-- Security UI/API refused `network.export`: executed=false, network_request_made=false, files_modified=false. The controlled adversarial source remains fictional.
+## Actual source connection and UI observations
 
-## Browser observations
+- Uploaded product guide became a reusable shared source; the frontend manifest remained private and assigned to the custom agent. Shared and individual source access are visible in [source metadata](evidence/knowledge-sources-live.json).
+- The UI connected the public read-only endpoint `https://api.github.com/repos/ollama/ollama`, extracted **6,799 characters**, assigned it privately to Product advisor, and selected a **five-minute** refresh interval. **Sync now** completed and updated the last successful sync. The automatic refresh also passed: last successful sync advanced from **13:17:11 UTC** after the manual action to **13:22:35 UTC** without another click. The API-only assistant subsequently matched this snapshot. This verifies public ingestion, manual refresh, and one observed automatic timer cycle; it does not verify a live authenticated provider account. [API snapshot evidence](evidence/knowledge-api-snapshot.json).
+- Actual **Create agent** produced a new exact identity and physical character. Its workspace includes Overview, Tasks, Test agent, Knowledge sources, Resources, Costs, and Suggestions. [Creation screenshot](evidence/custom-agent-created.png).
+- **Test agent** navigation was repaired after a real browser check showed the form did not receive focus. The current implementation synchronously scrolls the internal page and focuses the request textarea after the tab commits, including repeat clicks. [Fixed navigation screenshot](evidence/agent-test-fixed.png).
+- The local assistant exercised explicit private source selection, a real broad recommendation, and a contextual follow-up. Its internal job identity is not rendered as a workforce character.
+- Final **390×844** mobile checks passed for the knowledge library, Test navigation/textarea focus, and assistant panel. Document width stayed **390px** without horizontal overflow; the normal viewport was restored. Centered controls, maintained canvas, agent list, and reduced motion remain implemented. [Mobile library](evidence/knowledge-mobile.png) · [Mobile assistant](evidence/knowledge-assistant-mobile.png).
+- Existing-source reuse and **Save** were tested on Harper: temporary private-manifest access was granted, then revoked and restored to Product advisor only. The final UI was left on the current Knowledge sources page. [Final library](evidence/knowledge-library-final.png).
 
-- Actual WebGL rendering, five furnished stations and original procedural animated characters observed in the Codex in-app browser.
-- HR and Finance responses, exact totals, source snippets/rows, history and permissions observed in production UI.
-- Security action, comparison and approval, real batch queue and Studio creation tested through the UI.
-- A custom HR agent returned an honest missing-policy answer for interstellar travel, citing the handbook page that excludes travel allowances.
-- Camera drag/reset, reduced-motion toggle, 2D fallback, Enter activation and Escape close tested.
-- Mission Control showed device-wide GPU utilization, power and temperature; GPU memory displayed Unavailable.
-- Desktop and 390px portrait layout reviewed; responsive camera fitting and scrollable drawers implemented.
-- A fresh production browser tab passed 3D → 2D → 3D → Mission Control → 3D transitions, restoring the rendered room with no logged errors or warnings. The WebGL canvas stays mounted while hidden between views, avoiding the observed Drei/React renderer cleanup error.
-- The final 390px portrait recheck passed for the world and Finance drawer; document scroll width stayed at the viewport width. Camera orbit, motion toggle, and both view transitions passed with an empty error/warning log. See [final browser check record](evidence/browser-checks.json).
+## Deletion and recovery verification
 
-## Evidence and limitations
+- Real browser checks used one disposable agent and one source containing this project's README. Directory deletion, confirmation cancellation, Undo, individual-page deletion, tab closure, and Trash restoration passed. Source deletion, Undo, private/unassigned restoration, and Trash restoration passed. Every pre-existing agent/source identity and saved job was preserved.
+- Automated coverage verifies durable tombstones, no default-agent resurrection, queued-job cancellation, running-job rejection, source revocation from all identities and queued work, private/unassigned restoration, capacity limits, and refresh/delete concurrency. Enforcement continues when a visible Security or Optimizer identity is deleted.
+- Confirmation dialogs are portaled outside the creation form, have an accessible name, trap focus, initially select Keep, and close on Escape. The floating assistant uses a compact mobile launcher and page scrolling leaves room for final actions.
 
-- [Final production room](evidence/final-room.jpg), [operations room](evidence/operations-room.jpg), [HR](evidence/hr-response.jpg), [Finance](evidence/finance-response.jpg), [Security](evidence/security-block.jpg), [scheduler](evidence/scheduler-comparison.jpg), [Studio/missing-policy](evidence/agent-studio-not-found.jpg), [390px Finance drawer](evidence/mobile-drawer.jpg), [architecture](evidence/architecture.svg).
-- The durable history retains the initial rejected Finance narrative from testing. The validator was revised and repeated real Finance jobs passed afterward. No failure history was silently deleted.
-- WAN-disconnected acceptance remains **not tested**. Follow [OFFLINE_TEST.md](OFFLINE_TEST.md) on the GX10 after caching dependencies and model weights.
-- Multiuser authentication, external connectors, enterprise compliance and process sandboxing remain outside the hackathon MVP. Tools cannot execute arbitrary code or external actions.
+## Implemented format and security boundaries
 
-## Connection lifecycle fix (October 10 follow-up)
+- Files are limited to **25 MiB** (UI: 25 MB); indexed text to **200,000 characters** and previews to **12,000**. Supported uploads include text/Markdown/CSV/JSON/HTML/XML/YAML/logs, PDF, DOCX/XLSX/PPTX, and common images. Legacy binary Office formats require export.
+- Text PDFs read at most the first 100 pages; PDFs over 250 pages are refused. PDFs without extractable text use OCR on only the first five pages. Mixed text/image PDFs can leave image-only content unread. Password-protected PDFs require an unlocked copy. OCR can misread figures and does not provide general image understanding.
+- Office extraction reads stored text/cached cell values without executing macros, formulas, external references, or embedded programs. Unsupported or unreadable files retain visible stored/error states rather than being presented as searchable knowledge. Partial extraction is labeled.
+- Exact Finance analysis requires one complete CSV ledger with unique columns `vendor,invoice_id,due_date,amount,status,category`; dates, statuses, and amounts are validated. Other records use source-grounded model responses, not certified spreadsheet totals.
+- Linked sources use explicit public HTTP/HTTPS GET requests on ports 80/443, with a 5 MiB response limit and 15-second deadline. Private/loopback/link-local targets and URL-embedded credentials are refused. Optional Bearer authentication requires HTTPS and refuses redirects. Tokens are retained in local permission-restricted files and redacted from responses; this is not an enterprise encrypted credential vault.
+- Linked-source updates are periodic snapshots or manual refreshes. Failed refreshes retain last successful cached text with the error and successful-sync timestamp. The UI labels cached/partial reading. Automatic cadence has both automated coverage and one observed live refresh; authenticated connections have automated coverage, but no live provider credential was used in the recorded checks.
+- Sources are treated as data, not tool instructions. Role/agent allowlists deny arbitrary shell, message, payment, and record-export actions. Source assignment is checked again before queued business work; changing access does not silently broaden a queued request.
+- Empty/unmatched source questions do not substitute archived company fixtures. Retrieval remains bounded evidence selection, not exhaustive full-library review. User review of model advice is still necessary.
 
-The browser remained loaded after its terminal-owned backend process had stopped, causing every action to fail to fetch. The running app now uses an independent, loopback-only systemd user service with automatic restart on failure. `scripts/service.sh` provides start, stop, restart, status and logs; it refuses to mutate a unit owned by another project. This transient service lasts within the current user session; it does not enable reboot startup.
+## Resources, optimization, and historical evidence
 
-Observed crash recovery took **2.43 seconds** while no jobs were active. A controlled stop/start verified the UI shows Local service offline, disables new submissions, and clears its connection error after recovery. New agent creation and a real local Nemotron task passed after reconnecting. The new task answered the remote-work policy with a handbook page 2 citation in **1,378.6 ms**. Network failures never automatically retry a POST; validation errors retain their details. Strict TypeScript/production build and six mocked fetch behavior cases passed.
+Device utilization, temperature, and power are shared NVIDIA-SMI readings. GB10 memory counters are unavailable; agent metrics are saved job timings and API-reported tokens. Estimates appear only with a configured or manually entered hourly rate and do not represent bills, payments, physical GPU shares, or measured savings. Pausing intake does not interrupt running inference or unload shared weights.
 
-[Recovery evidence](evidence/connection-recovery.json) · [Successful new task](evidence/connection-fixed.jpg) · [Observed offline state](evidence/service-offline.jpg).
+October 10 evidence remains unchanged for recovery and comparison. It exercised earlier fixture-based HR/Finance/Support requests, FIFO/priority timed comparisons, explicit policy approval, deterministic `network.export` refusal, separate identities, and desktop/390px layouts. Fixture amounts and policy facts in those files are historical test inputs, not current product defaults or current acceptance expectations.
 
+- [Historical real-inference smoke](evidence/live-smoke.json), [priority execution](evidence/priority-live-jobs.json), [individual agent records](evidence/agent-workspace-proof.json), and [Support retrieval](evidence/support-rag-proof.json).
+- [Historical browser checks](evidence/browser-checks.json) and [individual workspace checks](evidence/agent-workspace-browser-checks.json) recorded restored WebGL view transitions without console errors and 390px layouts without document overflow. The canvas stays mounted while hidden to avoid the previously observed React/Drei cleanup error.
+- [Connection recovery](evidence/connection-recovery.json) recorded a 2.43-second no-active-job crash recovery and offline/reconnected UI states. The transient user service survives a closed terminal/chat for the current user session; it does not enable reboot startup.
 
-## Individual agent workspaces (October 10 UX update)
+## Unverified or future work
 
-- Production browser creation of Support agent **Avery** grew the actual room from **11 to 12 separate character bodies**. Every character tag maps to the exact stored agent ID, including duplicate roles. Selecting Avery opened its own internal app tab and full page with Overview, Tasks, Test agent, Resources, Costs, and Suggestions.
-- Avery's first real Support job completed with `nemotron3:33b`: **4,747.58 ms inference**, **1,001 reported tokens**, **27.12 ms queue wait**. Its own history contains that one job; older Support agents retain their separate histories. Source snippets and page references from the fictional four-page customer playbook were visible in the browser. The output is a draft for human review; retrieved references are identified separately when appended by the backend.
-- The local playbook covers account access, billing, onboarding, escalation, and missing-policy behavior. Independent real-model tests checked account access and a missing refund/restoration guarantee; no guarantee was invented. [Support retrieval proof](evidence/support-rag-proof.json).
-- Pause and resume were exercised through Avery's UI. A new API submission while paused returned **HTTP409**. Resume retained the completed task and its evidence. Backend tests also cover durable pause state and running/queued handling; pausing does not cancel inference or unload shared weights.
-- Finance and Optimizer display the same exact invoice evidence: raw unpaid **$6,200.50**, unpaid with first record per ID **$5,000.50**, raw overdue **$4,950.50**, deduplicated overdue **$3,750.50**, duplicate **INV-1001** at CSV rows **2 and 4**. The two pages link to one another. These are fictional business invoice balances, separate from agent compute estimates.
-- Optimizer shows each actual agent's workload, token/latency measurements, specific recommendation, supporting evidence, and manual intake controls. No agent is automatically paused. Security shows enforced feature descriptions and actual prior blocked events; its new controlled browser test again returned `executed:false`, `network_request_made:false`, and `files_modified:false`.
-- Costs honestly show no configured rate. Entering a manual **$1/hour** scenario for Avery showed **$0.0013** from its measured **4.77428 seconds** of processing. This is not an actual bill, electricity reading, or payment transaction.
-- Strict TypeScript and the Vite production build pass. The **38 backend tests** include exact cost parsing, correct Optimizer navigation targets, source retrieval, ID-scoped insights, and pause/resume behavior.
-
-[Saved API evidence](evidence/agent-workspace-proof.json) · [Individual characters](evidence/individual-agents.jpg) · [Mobile agent page](evidence/mobile-agent-page.jpg) · [Security page](evidence/security-agent-page.jpg).
-
-
-Final layout recheck: desktop and 390px views showed 12 separate agents and a searchable 12-card directory. Mobile document width stayed exactly 390px with no document overflow; viewport override was reset afterward. Global motion control disabled portrait animation as expected. Switching agent pages and 3D/list views preserved the room with no browser error/warning logs. Optimizer's own table also paused and resumed Avery successfully; its compact layout keeps each measured reason beside the control. The new measured UI comparison observed an urgent wait difference of **141.42 ms (50.84%)** for the same synthetic timed jobs, without changing the existing priority policy.
+**WAN-disconnected acceptance has not been observed.** Stored sources, built assets, and local inference do not require new remote snapshots, but the complete disconnected workflow still needs [OFFLINE_TEST.md](OFFLINE_TEST.md). No live authenticated API/provider account was used. Provider OAuth, imported browser sessions, JavaScript-only page rendering, enterprise authentication, multiuser isolation, advanced retrieval evaluation, and robust process sandboxing remain future work.

@@ -13,6 +13,7 @@ from app.security import validate_configuration
 from app.storage import Store
 from app.tools.hr import retrieve_policy
 from app.tools.workflows import WorkflowEvidenceError, run_workflow
+from conftest import FIXTURES, attach, attach_fixtures
 
 
 class SlowGroundedLLM:
@@ -33,8 +34,9 @@ def wait_for(client, job_id, states):
 
 
 def test_pause_running_work_finishes_holds_queue_and_resume_releases(tmp_path):
-    app = create_app(Settings(db_path=tmp_path / "state.db"), SlowGroundedLLM())
+    app = create_app(Settings(db_path=tmp_path / "state.db", upload_dir=tmp_path / "uploads"), SlowGroundedLLM())
     with TestClient(app, base_url="http://localhost") as client:
+        attach_fixtures(client)
         first = client.post("/api/jobs", json={"agent_id": "hr", "prompt": "How many days of PTO?"}).json()
         wait_for(client, first["id"], {"running"})
         second = client.post("/api/jobs", json={"agent_id": "hr", "prompt": "How many PTO days?"}).json()
@@ -62,12 +64,12 @@ def test_pause_running_work_finishes_holds_queue_and_resume_releases(tmp_path):
 
 def test_pause_is_durable_and_protected_stations_cannot_pause(tmp_path):
     path = tmp_path / "state.db"
-    with TestClient(create_app(Settings(db_path=path), SlowGroundedLLM()), base_url="http://localhost") as client:
+    with TestClient(create_app(Settings(db_path=path, upload_dir=tmp_path / "uploads"), SlowGroundedLLM()), base_url="http://localhost") as client:
         assert client.post("/api/agents/hr/control", json={"action": "pause"}).status_code == 200
         assert client.post("/api/agents/security/control", json={"action": "pause"}).status_code == 409
         assert client.post("/api/agents/optimizer/control", json={"action": "pause"}).status_code == 409
         assert client.post("/api/agents/hr/control", json={"action": "delete"}).status_code == 422
-    with TestClient(create_app(Settings(db_path=path), SlowGroundedLLM()), base_url="http://localhost") as restarted:
+    with TestClient(create_app(Settings(db_path=path, upload_dir=tmp_path / "uploads"), SlowGroundedLLM()), base_url="http://localhost") as restarted:
         hr = next(agent for agent in restarted.get("/api/agents").json() if agent["id"] == "hr")
         assert hr["enabled"] is False and hr["status"] == "paused"
         assert restarted.post("/api/jobs", json={"agent_id": "hr", "prompt": "Read PTO policy"}).status_code == 409
@@ -99,43 +101,46 @@ def test_insights_statistics_are_owned_and_cost_is_explicit_estimate(tmp_path):
     assert not any(rec["action"]["type"] == "pause_agent" for rec in guardian["recommendations"])
     finance = build_insights(store.get("agents", "finance"), store, Settings())
     evidence = finance["role_details"]["invoice_evidence"]
-    assert evidence["calculations"]["outstanding_total"] == "6200.50"
-    assert evidence["duplicate_invoices"][0]["invoice_id"] == "INV-1001"
-    assert finance["recommendations"][0]["action"] == {"type": "open_optimizer", "agent_id": "optimizer"}
+    assert evidence["available"] is False
+    assert finance["sources"] == []
+    assert not any(rec["id"].endswith(":allocation") for rec in finance["recommendations"])
     store.close()
 
 
-async def test_support_retrieval_citations_legacy_source_and_missing_document(tmp_path):
-    settings = Settings()
-    sources = retrieve_policy(settings.data_dir / "support_playbook.txt", "Customer cannot access account; password reset")
-    assert sources[0]["document"] == "support_playbook.txt"
-    assert sources[0]["page"] == 1
-    assert "Never ask for a password" in sources[0]["snippet"]
-    legacy = {**DEFAULT_AGENTS[2], "source": "support_tickets.json"}
-    result = await run_workflow(legacy, {"prompt": "Customer cannot access the account portal"}, settings, SlowGroundedLLM())
-    assert result["retrieval"] == "local SQLite FTS5" and result["draft_only"] is True
-    assert result["sources"][0]["document"] == "support_playbook.txt"
-    assert result["context_sources"][0]["document"] == "support_tickets.json"
-    validate_configuration(AgentCreate(name="Support", role="support", purpose="Draft grounded support replies", tools=["draft_support_reply"], source="support_playbook.txt"))
-    (tmp_path / "support_tickets.json").write_text("[]")
-    with pytest.raises(WorkflowEvidenceError) as captured:
-        await run_workflow(legacy, {"prompt": "Read refund policy"}, Settings(data_dir=tmp_path), SlowGroundedLLM())
-    assert captured.value.result["missing_source"] == "support_playbook.txt"
+def test_support_retrieval_citations_and_removed_assignment(tmp_path):
+    app = create_app(Settings(db_path=tmp_path / "state.db", upload_dir=tmp_path / "uploads"), SlowGroundedLLM())
+    with TestClient(app, base_url="http://localhost") as client:
+        source = attach(client, "support_playbook.txt", (FIXTURES / "support_playbook.txt").read_bytes(), ["support"])
+        submitted = client.post("/api/jobs", json={"agent_id": "support", "prompt": "Customer cannot access account; password reset"}).json()
+        result = wait_for(client, submitted["id"], {"completed", "error"})["result"]
+        assert result["retrieval"] == "local SQLite FTS5" and result["draft_only"] is True
+        assert result["sources"][0]["document"] == "support_playbook.txt"
+        assert result["sources"][0]["source_id"] == source["id"]
+        assert "Never ask for a password" in result["sources"][0]["snippet"]
+        assert client.post("/api/sources/" + source["id"] + "/access", json={"shared": False, "agent_ids": []}).status_code == 200
+        submitted = client.post("/api/jobs", json={"agent_id": "support", "prompt": "Read refund policy"}).json()
+        result = wait_for(client, submitted["id"], {"completed", "error"})["result"]
+        assert result["sources"] == [] and result["knowledge_found"] is False
+        assert "No searchable knowledge" in result["answer"]
 
 
-async def test_support_omitted_citations_get_only_real_retriever_references():
+def test_support_omitted_citations_get_only_real_retriever_references(tmp_path):
     class UncitedLLM:
         async def chat(self, system, prompt, max_tokens=None):
             return {"answer": "Use the Forgot password link and do not share passwords."}
-    result = await run_workflow(DEFAULT_AGENTS[2], {"prompt": "Draft a helpful response to a fictional customer who cannot access their account."}, Settings(), UncitedLLM())
-    assert result["sources"][0]["page"] == 1
-    assert result["citation_origin"] == "retriever"
-    assert "[1] support_playbook.txt · page 1" in result["answer"]
-    assert "Retrieved knowledge references" in result["answer"]
+    app = create_app(Settings(db_path=tmp_path / "state.db", upload_dir=tmp_path / "uploads"), UncitedLLM())
+    with TestClient(app, base_url="http://localhost") as client:
+        attach(client, "support_playbook.txt", (FIXTURES / "support_playbook.txt").read_bytes(), ["support"])
+        submitted = client.post("/api/jobs", json={"agent_id": "support", "prompt": "Draft a helpful response to a customer who cannot access their account."}).json()
+        result = wait_for(client, submitted["id"], {"completed", "error"})["result"]
+        assert result["sources"][0]["page"] == 1
+        assert result["citation_origin"] == "retriever"
+        assert "[1] support_playbook.txt · page 1" in result["answer"]
+        assert "Retrieved references" in result["answer"]
 
 
 def test_security_insights_show_actual_block_log(tmp_path):
-    with TestClient(create_app(Settings(db_path=tmp_path / "state.db"), SlowGroundedLLM()), base_url="http://localhost") as client:
+    with TestClient(create_app(Settings(db_path=tmp_path / "state.db", upload_dir=tmp_path / "uploads"), SlowGroundedLLM()), base_url="http://localhost") as client:
         assert client.get("/api/agents/not-real/insights").status_code == 404
         blocked = client.post("/api/security/demo", json={"agent_id": "finance"}).json()
         insight = client.get("/api/agents/security/insights").json()

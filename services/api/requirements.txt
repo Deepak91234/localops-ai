@@ -5,3 +5,9 @@ pydantic>=2.8,<3
 pytest>=8,<10
 pytest-asyncio>=0.24,<2
 pypdf>=5,<7
+python-multipart==0.0.32
+Pillow>=11,<13
+rapidocr-onnxruntime==1.4.4
+onnxruntime>=1.20,<2
+# Custom public-URL transport uses the verified 1.0 network-backend interface.
+httpcore==1.0.9

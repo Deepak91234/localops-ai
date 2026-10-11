@@ -46,7 +46,7 @@ def main():
         "model": model,
         "messages": [
             {"role": "system", "content": "Answer briefly in one sentence."},
-            {"role": "user", "content": "This is a fictional LocalOps health test. A policy grants 20 PTO days each year. How many PTO days does it grant?"},
+            {"role": "user", "content": "LocalOps readiness check. Reply with LOCALOPS_READY."},
         ],
         "temperature": 0,
         "max_tokens": 128,

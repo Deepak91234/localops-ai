@@ -14,3 +14,6 @@ work/
 *.log
 .DS_Store
 *.tsbuildinfo
+.tools/
+project-materials/*
+!project-materials/archived-demo-data/

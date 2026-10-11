@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 @dataclass
 class Settings:
-    data_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "demo_data")
+    data_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "work" / "knowledge")
     db_path: Path = field(default_factory=lambda: Path(os.getenv("LOCALOPS_DB_PATH", str(PROJECT_ROOT / "work" / "localops.sqlite3"))))
     llm_base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", "http://127.0.0.1:11434/v1"))
     model_name: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "nemotron3:33b"))
@@ -16,3 +16,4 @@ class Settings:
     llm_timeout: float = field(default_factory=lambda: float(os.getenv("LLM_TIMEOUT_SECONDS", "180")))
     max_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_TOKENS", "900")))
     hourly_rate_usd: str | None = field(default_factory=lambda: os.getenv("LOCALOPS_HOURLY_RATE_USD") or None)
+    upload_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "work" / "knowledge")

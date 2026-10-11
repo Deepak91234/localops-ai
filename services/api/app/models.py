@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Literal
-from pydantic import BaseModel, ConfigDict, Field
+from urllib.parse import parse_qsl, unquote, urlsplit
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 
 def utc_now() -> str:
@@ -19,6 +20,7 @@ class AgentStatus(str, Enum):
 
 
 class Permission(str, Enum):
+    read_knowledge = "read_knowledge"
     read_policy = "read_policy"
     analyze_invoices = "analyze_invoices"
     draft_support_reply = "draft_support_reply"
@@ -29,10 +31,11 @@ class Permission(str, Enum):
 class AgentCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=2, max_length=60)
-    role: Literal["hr", "finance", "support"]
+    role: Literal["hr", "finance", "support", "custom"]
     purpose: str = Field(min_length=8, max_length=500)
     tools: list[Permission] = Field(min_length=1, max_length=3)
-    source: Literal["handbook.txt", "invoices.csv", "support_tickets.json", "support_playbook.txt", "injection_policy.txt"]
+    source: str = Field(default="", max_length=200)
+    source_ids: list[str] = Field(default_factory=list, max_length=100)
 
 
 class Agent(BaseModel):
@@ -42,6 +45,7 @@ class Agent(BaseModel):
     purpose: str
     tools: list[str]
     source: str
+    source_ids: list[str] = Field(default_factory=list)
     status: AgentStatus = AgentStatus.idle
     enabled: bool = True
     created_at: str | None = None
@@ -51,6 +55,58 @@ class Agent(BaseModel):
 class AgentControl(BaseModel):
     model_config = ConfigDict(extra="forbid")
     action: Literal["pause", "resume"]
+
+
+class SourceAccess(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    shared: bool = False
+    agent_ids: list[str] = Field(default_factory=list, max_length=100)
+
+
+class SourceLink(SourceAccess):
+    name: str = Field(min_length=1, max_length=120)
+    url: str = Field(min_length=8, max_length=2000)
+    kind: Literal["url", "api"] = "url"
+    description: str = Field(default="", max_length=2000)
+    refresh_minutes: int = Field(default=0, ge=0, le=10080)
+    api_token: SecretStr | None = None
+
+    @model_validator(mode="after")
+    def credential_boundary(self):
+        parsed = urlsplit(self.url)
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError("Embedded URL credentials are refused; use the optional API Bearer token field.")
+        if any(key.lower() in {"token", "access_token", "api_key", "apikey", "password", "secret", "authorization"} for key, _ in parse_qsl(parsed.query)):
+            raise ValueError("Credentials in URL query parameters are refused; use the optional API Bearer token field.")
+        if self.api_token is not None:
+            value = self.api_token.get_secret_value()
+            if self.kind != "api":
+                raise ValueError("Bearer credentials are allowed only for read-only API sources.")
+            if not value or len(value) > 4096 or any(not 33 <= ord(character) <= 126 for character in value):
+                raise ValueError("Bearer token must be at most 4096 ASCII characters without whitespace.")
+            if parsed.scheme != "https":
+                raise ValueError("Authenticated API sources require HTTPS.")
+            if value in unquote(self.url):
+                raise ValueError("The API token must be supplied only in its dedicated credential field.")
+        return self
+
+
+class AgentSources(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    source_ids: list[str] = Field(default_factory=list, max_length=100)
+
+
+class AssistantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prompt: str = Field(min_length=3, max_length=4000)
+    source_ids: list[str] | None = Field(default=None, max_length=100)
+    history: list["ConversationMessage"] = Field(default_factory=list, max_length=6)
+
+
+class ConversationMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
 
 
 class JobCreate(BaseModel):
@@ -73,6 +129,8 @@ class Job(BaseModel):
     result: dict[str, Any] | None = None
     error: str | None = None
     metrics: dict[str, Any] = Field(default_factory=dict)
+    source_ids: list[str] = Field(default_factory=list)
+    history: list[ConversationMessage] = Field(default_factory=list)
 
 
 class ActivityEvent(BaseModel):

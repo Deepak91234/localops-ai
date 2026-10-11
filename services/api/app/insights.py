@@ -2,8 +2,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from .models import utc_now
-from .tools.finance import analyze_invoices
-from .tools.hr import extract_pages
+from .knowledge import ASSISTANT_ID
 
 
 BLOCKED_TOOLS = ["network.export", "shell", "execute_code", "send_email", "make_payment", "delete_file"]
@@ -58,10 +57,10 @@ def recommendations_for(agent, workload, agents, jobs, policy):
     def add(key, title, explanation, evidence, action="review_jobs", approval=False):
         target_id = "optimizer" if action == "open_optimizer" else agent["id"]
         suggestions.append({"id": agent["id"] + ":" + key, "title": title, "explanation": explanation, "evidence": evidence, "action": {"type": action, "agent_id": target_id}, "requires_approval": approval})
-    controllable = agent["role"] in {"hr", "finance", "support"}
+    controllable = agent["role"] in {"hr", "finance", "support", "custom"}
     if not agent.get("enabled", True) and controllable:
         add("resume", "Resume this agent when needed", "Existing queued work is retained. Resuming permits this agent to receive and execute new work; it does not download or load model weights by itself.", {"queued_jobs": workload["queued_jobs"]}, "resume_agent", True)
-    peers = [other for other in agents if other["id"] != agent["id"] and other["role"] == agent["role"] and other["source"] == agent["source"]]
+    peers = [other for other in agents if other["id"] != agent["id"] and other["role"] == agent["role"] and set(other.get("source_ids", [])) == set(agent.get("source_ids", []))]
     if peers and controllable:
         add("overlap", "Review overlapping agent templates", "Other agents use this same role and local source. Check whether their purposes overlap before deciding which agents should accept new work.", {"same_role_source_agent_ids": [other["id"] for other in peers], "this_agent_jobs": workload["total_jobs"]}, "review_agents")
     if controllable and agent.get("enabled", True) and not workload["running_jobs"] and not workload["queued_jobs"] and (not workload["total_jobs"] or (workload["idle_seconds"] or 0) >= 300):
@@ -79,38 +78,23 @@ def recommendations_for(agent, workload, agents, jobs, policy):
 
 
 def invoice_evidence(agent, jobs, settings):
-    completed = [job for job in jobs if job["agent_id"] == agent["id"] and job["status"] == "completed" and (job.get("result") or {}).get("calculations")]
+    completed = [job for job in jobs if job["agent_id"] == agent["id"] and job["status"] == "completed" and job.get("source_ids") and (job.get("result") or {}).get("synthetic") is False and (job.get("result") or {}).get("calculations")]
     if completed:
         job = max(completed, key=lambda item: item["completed_at"] or item["created_at"])
         result = job["result"]
         return {"available": True, "origin": "Stored completed Finance job", "source_job_id": job["id"], **{key: result.get(key) for key in ["calculations", "duplicate_invoices", "overdue_rows", "rows", "sources"]}}
-    try:
-        return {"available": True, "origin": "Current deterministic local CSV review; no model job implied", "source_job_id": None, **analyze_invoices(settings.data_dir / agent["source"])}
-    except (OSError, ValueError, InvalidOperation) as exc:
-        return {"available": False, "error": str(exc), "source_job_id": None}
+    return {"available": False, "error": "No completed invoice review from your attached CSV knowledge is available. Attach an invoice CSV and run a Finance task to calculate actual balances.", "source_job_id": None}
 
 
-def source_details(agent, settings):
-    names = [agent["source"]]
-    if agent["role"] == "support":
-        names = list(dict.fromkeys([agent["source"], "support_playbook.txt", "support_tickets.json"]))
-    sources = []
-    for name in names:
-        path = settings.data_dir / name
-        item = {"id": name, "name": name, "available": path.is_file(), "role": agent["role"], "synthetic": True, "page_count": None}
-        if path.is_file() and path.suffix.lower() in {".txt", ".pdf"}:
-            try:
-                item["page_count"] = len(extract_pages(path))
-            except (OSError, ValueError):
-                item["available"] = False
-        if agent["role"] == "optimizer":
-            item.update(available=True, synthetic=True, name="Measured scheduler microbenchmark", kind="internal_workload")
-        sources.append(item)
-    return sources
+def source_details(agent, knowledge):
+    if knowledge is None:
+        return []
+    allowed = set(knowledge.accessible_ids(agent))
+    return [{**source, "available": bool(source["text_length"] and (source["status"] == "ready" or source.get("last_synced_at"))), "synthetic": False} for source in knowledge.list() if source["id"] in allowed]
 
 
-def build_insights(agent, store, settings):
-    agents, jobs = store.all("agents"), store.all("jobs")
+def build_insights(agent, store, settings, knowledge=None):
+    agents, jobs = [a for a in store.active("agents") if a["id"] != ASSISTANT_ID], store.all("jobs")
     own = [job for job in jobs if job["agent_id"] == agent["id"]]
     workload = own_workload(agent, jobs)
     policy = store.get("settings", "scheduler")["policy"]
@@ -120,10 +104,10 @@ def build_insights(agent, store, settings):
     cost = compute_cost(workload, settings.hourly_rate_usd)
     suggestions = recommendations_for(agent, workload, agents, jobs, policy)
     latest = max(own, key=lambda job: job["created_at"]) if own else None
-    sources = source_details(agent, settings)
-    role_details = {"kind": "knowledge", "document": agent["source"], "retrieval": "local SQLite FTS5", "latest_sources": (latest.get("result") or {}).get("sources", []) if latest else []}
+    sources = source_details(agent, knowledge)
+    role_details = {"kind": "knowledge", "document": agent.get("source", ""), "retrieval": "local SQLite FTS5", "latest_sources": (latest.get("result") or {}).get("sources", []) if latest else []}
     if agent["role"] == "support":
-        role_details.update(kind="support_rag", knowledge_sources=["support_playbook.txt", "support_tickets.json"], draft_only=True)
+        role_details.update(kind="support_rag", knowledge_sources=[source["id"] for source in sources], draft_only=True)
     elif agent["role"] in {"finance", "optimizer"}:
         allocation = [{"agent": {"id": a["id"], "name": a["name"], "role": a["role"], "status": a["status"], "enabled": a.get("enabled", True)}, "workload": own_workload(a, jobs), "cost": compute_cost(own_workload(a, jobs), settings.hourly_rate_usd), "recommendations": recommendations_for(a, own_workload(a, jobs), agents, jobs, policy)} for a in agents]
         if agent["role"] == "finance":
@@ -137,5 +121,5 @@ def build_insights(agent, store, settings):
             role_details = {"kind": "allocation_review", "agents": allocation, "latest_comparison": comparison["result"] if comparison else None, "finance_evidence": invoice_evidence(finance, jobs, settings) if finance else None, "note": "Suggestions are deterministic observations from each agent's own stored jobs. Idle pause controls stop work intake, not shared model memory. Only measured scheduler scenarios support scheduling claims."}
     elif agent["role"] == "security":
         blocked = [event for event in store.all("events") if event["type"] == "security_blocked"]
-        role_details = {"kind": "security", "enforcement_features": [{"name": "Role and agent tool allowlists", "enforced": True, "detail": "Every workflow is checked before its audited tool runs."}, {"name": "Fixed local data sources", "enforced": True, "detail": "Agent configurations permit only known role-specific filenames; generated paths and code are refused."}, {"name": "Loopback request boundary", "enforced": True, "detail": "Remote browser origins, non-loopback Host headers, hosted model URLs, redirects, and environment proxy forwarding are refused."}, {"name": "Grounded model evidence", "enforced": True, "detail": "HR/Support citation IDs and Finance exact fact fields are validated. Documents cannot grant new tools."}, {"name": "Human approval for queue policy", "enforced": True, "detail": "Policy changes require an explicit approved request. Running work is not preempted."}], "blocked_events": blocked[-50:], "network_export_implemented": False, "external_payment_implemented": False}
+        role_details = {"kind": "security", "enforcement_features": [{"name": "Role and agent tool allowlists", "enforced": True, "detail": "Every workflow is checked before its audited tool runs."}, {"name": "Explicit knowledge access", "enforced": True, "detail": "Business agents read only shared or assigned library IDs. Source text and custom purposes cannot grant tools, paths, or code execution."}, {"name": "Loopback inference and browser boundary", "enforced": True, "detail": "Remote browser origins, non-loopback Host headers, hosted model URLs, inference redirects, and environment proxy forwarding are refused."}, {"name": "Public source fetch restrictions", "enforced": True, "detail": "Website and API integrations make bounded read-only GET requests to validated public IPs. Private network addresses, URL credentials, and unsafe redirects are blocked."}, {"name": "Grounded model evidence", "enforced": True, "detail": "Citation IDs and Finance exact fact fields are validated. Documents cannot grant new tools."}, {"name": "Human approval for queue policy", "enforced": True, "detail": "Policy changes require an explicit approved request. Running work is not preempted."}], "blocked_events": blocked[-50:], "network_export_implemented": False, "external_payment_implemented": False}
     return {"agent": agent, "generated_at": utc_now(), "workload": workload, "queue": {"policy": policy, "positions": positions, "paused_jobs_count": workload["queued_jobs"] if not agent.get("enabled", True) else 0}, "sources": sources, "permissions": {"allowed_tools": agent["tools"], "blocked_tools": BLOCKED_TOOLS, "enforced": True, "external_actions": False}, "recommendations": suggestions, "cost": cost, "role_details": role_details}

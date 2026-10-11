@@ -1,0 +1,20 @@
+{
+  "outcome": "passed",
+  "disposable_records": "one QA agent and one uploaded project README, now in recoverable Trash",
+  "ui_checks": [
+    "agent confirmation cancel",
+    "directory deletion and Undo",
+    "individual page deletion and tab closure",
+    "Trash agent restore",
+    "source deletion and Undo",
+    "private/unassigned source restoration",
+    "Trash source restore",
+    "keyboard confirmation and Escape cancellation"
+  ],
+  "pre_existing_records_preserved": {
+    "agents": 16,
+    "sources": 6,
+    "jobs": 8
+  },
+  "inference_requests_submitted": 0
+}

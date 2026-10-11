@@ -1,0 +1,72 @@
+[
+  {
+    "id": "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+    "name": "LocalOps product guide",
+    "kind": "file",
+    "filename": "USER_GUIDE.md",
+    "mime_type": "text/markdown",
+    "url": null,
+    "status": "ready",
+    "description": "",
+    "bytes": 4410,
+    "shared": true,
+    "last_synced_at": "2026-10-11T13:08:35.366008+00:00",
+    "error": null,
+    "refresh_minutes": 0,
+    "auth_configured": false,
+    "last_attempted_at": null,
+    "truncated": false,
+    "cached": false,
+    "reading_note": null,
+    "text_length": 4410,
+    "agent_ids": []
+  },
+  {
+    "id": "037b855e-b506-4c4f-82a5-629822613078",
+    "name": "LocalOps frontend manifest",
+    "kind": "file",
+    "filename": "package.json",
+    "mime_type": "application/json",
+    "url": null,
+    "status": "ready",
+    "description": "",
+    "bytes": 558,
+    "shared": false,
+    "last_synced_at": "2026-10-11T13:09:33.337141+00:00",
+    "error": null,
+    "refresh_minutes": 0,
+    "auth_configured": false,
+    "last_attempted_at": null,
+    "truncated": false,
+    "cached": false,
+    "reading_note": null,
+    "text_length": 650,
+    "agent_ids": [
+      "custom-48aba432"
+    ]
+  },
+  {
+    "id": "f31ce9d8-3c93-47e3-aeb2-7d07322bc2de",
+    "name": "Ollama runtime project",
+    "kind": "api",
+    "filename": null,
+    "mime_type": "application/json",
+    "url": "https://api.github.com/repos/ollama/ollama",
+    "status": "ready",
+    "description": "Current public repository metadata for the local inference runtime.",
+    "bytes": 6109,
+    "shared": false,
+    "last_synced_at": "2026-10-11T13:22:35.529097+00:00",
+    "error": null,
+    "refresh_minutes": 5,
+    "auth_configured": false,
+    "last_attempted_at": "2026-10-11T13:22:35.529086+00:00",
+    "truncated": false,
+    "cached": false,
+    "reading_note": null,
+    "text_length": 6799,
+    "agent_ids": [
+      "custom-48aba432"
+    ]
+  }
+]

@@ -1,4 +1,6 @@
 import csv
+import codecs
+import io
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
@@ -11,8 +13,14 @@ def money(amount: Decimal) -> str:
 
 def analyze_invoices(path: Path, as_of: date = date(2026, 10, 10)):
     """Raw and deduplicated totals both shown; duplicate records are never silently removed."""
-    with path.open(newline="", encoding="utf-8") as source:
-        rows = list(csv.DictReader(source))
+    raw = path.read_bytes()
+    encoding = "utf-32" if raw.startswith((codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)) else "utf-16" if raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)) else "utf-8-sig"
+    with io.StringIO(raw.decode(encoding, errors="strict"), newline="") as source:
+        reader = csv.DictReader(source)
+        required = {"vendor", "invoice_id", "due_date", "amount", "status", "category"}
+        if len(reader.fieldnames or []) != len(required) or set(reader.fieldnames or []) != required:
+            raise ValueError("Invoice CSV requires exactly six unique columns: vendor, invoice_id, due_date, amount, status, category.")
+        rows = list(reader)
     ids = defaultdict(list)
     overdue = []
     outstanding = Decimal("0")
@@ -21,7 +29,6 @@ def analyze_invoices(path: Path, as_of: date = date(2026, 10, 10)):
     unique_overdue = Decimal("0")
     seen = set()
     for index, row in enumerate(rows, 2):
-        required = {"vendor", "invoice_id", "due_date", "amount", "status", "category"}
         if set(row) != required:
             raise ValueError("Invoice CSV columns do not match the approved schema.")
         value = Decimal(row["amount"])

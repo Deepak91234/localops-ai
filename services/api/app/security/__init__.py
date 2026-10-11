@@ -1,5 +1,5 @@
 from urllib.parse import urlparse
-from ..agents import ROLE_SOURCES, ROLE_TOOLS
+from ..agents import ROLE_TOOLS
 from ..models import AgentCreate, ToolCall
 
 
@@ -19,8 +19,10 @@ def validate_configuration(config: AgentCreate):
     tools = {str(tool.value) for tool in config.tools}
     if not tools.issubset(ROLE_TOOLS[config.role]):
         raise PermissionDenied("This role cannot receive the requested tool permissions.")
-    if config.source not in ROLE_SOURCES[config.role]:
-        raise PermissionDenied("The selected local source does not match this agent role.")
+    if config.source:
+        raise PermissionDenied("Legacy fixture filenames are disabled. Assign uploaded or linked sources by source_ids.")
+    if len(set(config.source_ids)) != len(config.source_ids):
+        raise PermissionDenied("Knowledge source IDs must be unique.")
     if len(tools) != len(config.tools):
         raise PermissionDenied("Tool permissions must be unique.")
 

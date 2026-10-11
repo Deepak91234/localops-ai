@@ -14,7 +14,7 @@ export type WorldProps = {
   active?: boolean
 }
 
-type Role = 'hr' | 'finance' | 'support' | 'security' | 'optimizer'
+type Role = 'hr' | 'finance' | 'support' | 'security' | 'optimizer' | 'custom'
 type Point = [number, number, number]
 const ZONES: Array<{ role: Role; label: string; subtitle: string; position: Point; color: string }> = [
   { role: 'hr', label: 'HR', subtitle: 'POLICY & PEOPLE', position: [-5.5, 0, 2.6], color: '#63c8bd' },
@@ -27,7 +27,7 @@ const SLATE = '#24313e'
 const WHITE = '#e5e9e7'
 const CAMERA_POSITION: Point = [10, 9.5, 15]
 const CAMERA_TARGET: Point = [-.15, .35, -.1]
-const ROLE_NAME: Record<Role, string> = { hr: 'HR', finance: 'Finance', support: 'Support', security: 'Security', optimizer: 'Optimizer' }
+const ROLE_NAME: Record<Role, string> = { hr: 'HR', finance: 'Finance', support: 'Support', security: 'Security', optimizer: 'Optimizer', custom: 'Custom' }
 const normalizeRole = (role: string): string => {
   const value = role.toLowerCase()
   if (value.includes('hr') || value.includes('human')) return 'hr'
@@ -38,9 +38,9 @@ const normalizeRole = (role: string): string => {
   return value
 }
 const agentSeed = (id: string) => Array.from(id).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0)
-const agentRole = (agent: WorldAgent): Role => ZONES.find(zone => zone.role === normalizeRole(agent.role))?.role ?? 'hr'
+const agentRole = (agent: WorldAgent): Role => ZONES.find(zone => zone.role === normalizeRole(agent.role))?.role ?? 'custom'
 const agentColor = (agent: WorldAgent): string => {
-  const base = new THREE.Color(ZONES.find(zone => zone.role === agentRole(agent))!.color)
+  const base = new THREE.Color(ZONES.find(zone => zone.role === agentRole(agent))?.color ?? '#94bdd0')
   const hsl = { h: 0, s: 0, l: 0 }
   base.getHSL(hsl)
   const seed = agentSeed(agent.id)
@@ -183,6 +183,13 @@ function Shield({ color, scale = 1 }: { color: string; scale?: number }) {
 }
 
 function Accessory({ role, color }: { role: Role; color: string }) {
+  if (role === 'custom') return <group position={[0, -.28, .18]} rotation={[.08, .2, -.12]}>
+    <SoftBox size={[.31, .4, .07]} color="#405b6c" radius={.04} />
+    <SoftBox size={[.255, .325, .013]} position={[0, .015, .043]} color="#193440" radius={.023} />
+    <SoftBox size={[.025, .21, .012]} position={[-.062, .015, .054]} color={color} emissive={color} intensity={.35} radius={.007} />
+    {[.084, .024, -.036].map((y, i) => <SoftBox key={y} size={[.09 - i * .012, .021, .012]} position={[.033, y, .055]} color={i===0?'#d7e9e8':color} emissive={color} intensity={.15} radius={.006} />)}
+    <Ball position={[0, -.155, .049]} radius={.016} color={color} />
+  </group>
   if (role === 'hr') return <group position={[0, -.27, .17]} rotation={[.18, .23, -.15]}>
     <SoftBox size={[.29, .39, .10]} color={color} radius={.035} />
     <SoftBox size={[.24, .32, .084]} position={[.017, 0, -.008]} color="#e1e8df" radius={.017} />

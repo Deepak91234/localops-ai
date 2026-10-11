@@ -1,0 +1,99 @@
+{
+  "id": "cfc2c7dd-6d25-4cd2-9aaf-e8e2c2341d09",
+  "agent_id": "custom-48aba432",
+  "type": "custom",
+  "prompt": "What is the maximum upload file size, and what React dependency version is declared in the project manifest? Cite the sources.",
+  "priority": "standard",
+  "status": "completed",
+  "created_at": "2026-10-11T13:10:48.267678+00:00",
+  "started_at": "2026-10-11T13:10:48.271533+00:00",
+  "completed_at": "2026-10-11T13:10:58.602975+00:00",
+  "result": {
+    "answer": "The maximum upload file size is 25\u202fMB ([2]), and the project manifest declares React version\u202f^19.2.0 ([1]).",
+    "model": "nemotron3:33b",
+    "inference_latency_ms": 10327.04,
+    "inference_wait_ms": 0.01,
+    "usage": {
+      "prompt_tokens": 2054,
+      "completion_tokens": 34,
+      "total_tokens": 2088
+    },
+    "source": "local_nemotron",
+    "base_url": "http://127.0.0.1:11434/v1",
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "1",
+        "source_id": "037b855e-b506-4c4f-82a5-629822613078",
+        "document": "package.json",
+        "name": "LocalOps frontend manifest",
+        "page": 1,
+        "snippet": "{\n  \"name\": \"localops-ai-web\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"dev\": \"vite --host 127.0.0.1\",\n    \"build\": \"tsc -b && vite build\",\n    \"preview\": \"vite preview --host 127.0.0.1\"\n  },\n  \"dependencies\": {\n    \"react\": \"^19.2.0\",\n    \"react-dom\": \"^19.2.0\",\n    \"three\": \"^0.180.0\",\n    \"@react-three/fiber\": \"^9.3.0\",\n    \"@react-three/drei\": \"^10.7.0\",\n    \"lucide-react\": \"^0.468.0\"\n  },\n  \"devDependencies\": {\n    \"@types/react\": \"^19.2.0\",\n    \"@types/react-dom\": \"^19.2.0\",\n    \"@types/three\": \"^0.180.0\",\n    \"@vitejs/plugin-react\": \"^5.0.0\",\n    \"typescript\": \"^5.9.0\",\n    \"vite\": \"^7.1.0\"\n  }\n}",
+        "url": null,
+        "kind": "file"
+      },
+      {
+        "id": "2",
+        "source_id": "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+        "document": "USER_GUIDE.md",
+        "name": "LocalOps product guide",
+        "page": 1,
+        "snippet": "# LocalOps AI user guide\n\nLocalOps AI runs on this GX10 at http://127.0.0.1:8000/. Agent responses use the installed local Nemotron model. The Living workspace represents every visible agent with its own character. Select a character to open its workspace.\n\n## Add your knowledge\n\nOpen **Knowledge sources** in the sidebar. Choose **Upload files** or **Link website or API**. Each source shows whether its extracted content is searchable, who can use it, and any reading or connection error.\n\nUploads support PDF, text, Markdown, CSV, JSON, HTML, Word DOCX, Excel XLSX, PowerPoint PPTX, and common image formats. Image text recognition runs locally. Scanned PDFs use local OCR on the first five pages; longer scans are marked as partially read. Text PDFs also use bounded page and text extraction. Other file types can be saved, but a file without extracted text is marked as unavailable for search. The file limit is 25 MB; indexed text is capped at 200,000 characters per source. Source previews show the first 12,000 characters.\n\nSelect **Available to all agents** to share knowledge with the whole team, including future agents. Clear that option to choose individual agents, or leave a source unassigned until it is needed. **Manage access** changes this later. In an agent workspace, the **Knowledge sources** tab lets you select existing documents and save that agent's source selection.\n\nWebsite connections read page text. API connections read text or JSON from a read-only endpoint and can use an optional Bearer token. Connections use public HTTP/HTTPS addresses; private network addresses",
+        "url": null,
+        "kind": "file"
+      },
+      {
+        "id": "3",
+        "source_id": "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+        "document": "USER_GUIDE.md",
+        "name": "LocalOps product guide",
+        "page": 1,
+        "snippet": "`work/localops.sqlite3`; user sources are in `work/knowledge`. Archived handoff materials and the previous demo records remain in `project-materials` for recovery and are not a source of normal agent answers.",
+        "url": null,
+        "kind": "file"
+      },
+      {
+        "id": "4",
+        "source_id": "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+        "document": "USER_GUIDE.md",
+        "name": "LocalOps product guide",
+        "page": 1,
+        "snippet": "it instead of substituting demo records.\n\nFinance can compute exact invoice totals for CSV files with the supported invoice column structure. Other financial documents use source-grounded question answering; a generated narrative is not a verified spreadsheet calculation.\n\n## Ask the assistant\n\nThe bottom-right **I can help you** button opens the knowledge assistant. Select the sources you want it to use, then ask for a summary, a policy answer, or recommendations about those records. Shared searchable sources are selected initially; you can change the selection. Follow-up questions retain the recent conversation and use the current source selection. Replies cite the retrieved passages.\n\n## Review operations\n\nAgent Resources shows measured job timing and API-reported tokens. System monitor shows shared GX10 readings. Cost estimates require a configured hourly rate and are not payments. Optimizer recommendations use actual saved workloads; pausing intake does not unload the shared model. Security and scheduler checks are explicit controlled test scenarios.\n\nSource contents and API responses are treated as data. They do not grant agent tool permissions. Agents do not execute shell commands, send messages, export company records, or initiate payments.\n\nThe project, local database, uploaded files, and dependencies are under `/home/asus/Downloads/localops-ai`. Runtime records are in `work/localops.sqlite3`; user sources are in `work/knowledge`. Archived handoff materials and the previous demo records remain in `project-materials` for recovery and are not a source of normal agent",
+        "url": null,
+        "kind": "file"
+      },
+      {
+        "id": "5",
+        "source_id": "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+        "document": "USER_GUIDE.md",
+        "name": "LocalOps product guide",
+        "page": 1,
+        "snippet": "ite connections read page text. API connections read text or JSON from a read-only endpoint and can use an optional Bearer token. Connections use public HTTP/HTTPS addresses; private network addresses are refused. Browser login sessions, provider OAuth sign-in, and pages that require JavaScript rendering are not imported. Export those records as files or use the service's read-only API endpoint. Tokens are stored locally and are not returned in source metadata or previews.\n\nLinked sources can refresh every five minutes, fifteen minutes, or hour, or only on demand. **Sync now** requests a refresh. These are periodic snapshots, not continuous streaming data. Check the displayed last-sync time and reading status before relying on a current-data answer.\n\n## Create and test an agent\n\nChoose **Create agent**, select HR, Finance, or **Other**, name the agent, and describe its work. For Other, write your own purpose. Upload or link knowledge in the creation dialog, or select sources already in the library. Shared sources are included automatically. Sources can also be added later.\n\nClick **Test agent** to open and focus the request form. Enter a question about its assigned records and submit it. A paused agent shows a Resume action. Replies retain source passages, model information, and actual request timings in Tasks. If no searchable knowledge is available, the agent asks you to add it instead of substituting demo records.\n\nFinance can compute exact invoice totals for CSV files with the supported invoice column structure. Other financial documents use source-grounded question ans",
+        "url": null,
+        "kind": "file"
+      }
+    ],
+    "retrieval": "local SQLite FTS5",
+    "knowledge_found": true,
+    "draft_only": false,
+    "citation_origin": "model",
+    "synthetic": false,
+    "tool": "read_knowledge"
+  },
+  "error": null,
+  "metrics": {
+    "queue_wait_ms": 3.85,
+    "inference_latency_ms": 10327.04,
+    "inference_wait_ms": 0.01,
+    "tokens": 2088,
+    "prompt_tokens": 2054,
+    "completion_tokens": 34,
+    "model": "nemotron3:33b",
+    "processing_ms": 10328.73
+  },
+  "source_ids": [
+    "e1d045cb-ec8a-4dc8-9057-b47f0074efa6",
+    "037b855e-b506-4c4f-82a5-629822613078"
+  ],
+  "history": []
+}
