@@ -13,3 +13,4 @@ work/
 *.sqlite3-wal
 *.log
 .DS_Store
+*.tsbuildinfo
